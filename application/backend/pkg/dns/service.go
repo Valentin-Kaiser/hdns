@@ -13,7 +13,7 @@ var job *cron.Cron
 
 func Start() {
 	job = cron.New(cron.WithSeconds())
-	_, err := job.AddFunc(config.Get().Service.Refresh, refresh)
+	_, err := job.AddFunc(config.Get().Service.Refresh, Refresh)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to add cron job for DNS refresh")
 		return
@@ -32,7 +32,7 @@ func Restart() {
 	log.Info().Msg("DNS refresh cron job restarted")
 }
 
-func refresh() {
+func Refresh() {
 	addr, err := UpdateAddress()
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update public IP address")

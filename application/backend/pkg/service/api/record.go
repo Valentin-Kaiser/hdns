@@ -17,6 +17,7 @@ func init() {
 		EndpointEncodingJSON,
 		[]string{
 			"/api/object/record",
+			"/api/object/record/{id}",
 		}, map[string]Handler{
 			"GET":    GetRecord,
 			"POST":   CreateRecord,
@@ -98,11 +99,6 @@ func CreateRecord(c *Context) (interface{}, error) {
 }
 
 func UpdateRecord(c *Context) (interface{}, error) {
-	id := c.req.PathValue("id")
-	if id == "" {
-		return nil, apperror.NewError("record ID is required")
-	}
-
 	var record model.Record
 	err := json.NewDecoder(c.req.Body).Decode(&record)
 	if err != nil {
@@ -112,9 +108,12 @@ func UpdateRecord(c *Context) (interface{}, error) {
 	if err != nil {
 		return nil, apperror.Wrap(err)
 	}
+	if record.ID == 0 {
+		return nil, apperror.NewError("record ID is required")
+	}
 
 	err = database.Execute(func(db *gorm.DB) error {
-		return db.Model(&model.Record{}).Where("id = ?", id).Updates(record).Error
+		return db.Model(&model.Record{}).Where("id = ?", record.ID).Updates(record).Error
 	})
 	if err != nil {
 		return nil, apperror.NewError("failed to update record").AddError(err)

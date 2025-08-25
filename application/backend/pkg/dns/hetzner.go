@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/Valentin-Kaiser/go-core/apperror"
 	"github.com/Valentin-Kaiser/go-core/database"
@@ -92,11 +93,23 @@ func updateHetzner(r *model.Record, ip string) error {
 			TTL:    r.TTL,
 			Value:  ip,
 		}
-		return c.createRecord(newRecord)
+		err = c.createRecord(newRecord)
+		if err != nil {
+			return apperror.Wrap(err)
+		}
 	}
-	rec.Value = ip
-	rec.TTL = r.TTL
-	return c.updateRecord(rec)
+
+	if found {
+		rec.Value = ip
+		rec.TTL = r.TTL
+		err = c.updateRecord(rec)
+		if err != nil {
+			return apperror.Wrap(err)
+		}
+	}
+
+	r.LastUpdate = time.Now()
+	return nil
 }
 
 func (c *client) updateRecord(record *Record) error {

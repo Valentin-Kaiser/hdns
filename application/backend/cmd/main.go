@@ -69,9 +69,10 @@ func main() {
 	}
 
 	go database.Connect(time.Second, config.Get().Database)
-	go service.Start()
 	database.AwaitConnection()
+	dns.Refresh() // Initial refresh on startup
 	dns.Start()
+	go service.Start()
 
 	ctx := interruption.OnSignal([]func() error{
 		database.Disconnect,

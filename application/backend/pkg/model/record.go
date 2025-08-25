@@ -7,6 +7,7 @@ import (
 	"errors"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/Valentin-Kaiser/go-core/apperror"
 	"github.com/Valentin-Kaiser/go-core/flag"
@@ -27,14 +28,15 @@ const (
 
 type Record struct {
 	BaseModel
-	Token     Token      `gorm:"uniqueIndex;not null" json:"token"`
-	ZoneID    string     `gorm:"not null" json:"zone_id"`
-	Type      RecordType `gorm:"not null" json:"type"`
-	Domain    string     `gorm:"not null" json:"domain"`
-	Name      string     `gorm:"not null" json:"name"`
-	TTL       uint32     `gorm:"not null" json:"ttl"`
-	AddressID *uint64    `json:"address_id,omitempty"`
-	Address   *Address   `gorm:"foreignKey:AddressID" json:"address,omitempty"`
+	Token      Token      `gorm:"uniqueIndex;not null" json:"token"`
+	ZoneID     string     `gorm:"not null" json:"zone_id"`
+	Type       RecordType `gorm:"not null" json:"type"`
+	Domain     string     `gorm:"not null" json:"domain"`
+	Name       string     `gorm:"not null" json:"name"`
+	TTL        uint32     `gorm:"not null" json:"ttl"`
+	AddressID  *uint64    `json:"address_id,omitempty"`
+	Address    *Address   `gorm:"foreignKey:AddressID" json:"address,omitempty"`
+	LastUpdate time.Time  `gorm:"not null" json:"last_update"`
 }
 
 type Token string
@@ -56,7 +58,7 @@ func (r *Record) Validate() error {
 }
 
 func (t Token) MarshalJSON() ([]byte, error) {
-	return []byte(`""`), nil
+	return []byte(`"` + string(t) + `"`), nil
 }
 
 func (t *Token) UnmarshalJSON(data []byte) error {
