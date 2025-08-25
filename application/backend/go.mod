@@ -2,10 +2,8 @@ module github.com/Valentin-Kaiser/hdns
 
 go 1.24.2
 
-replace github.com/Valentin-Kaiser/go-core => ../../../go-core
-
 require (
-	github.com/Valentin-Kaiser/go-core v1.1.2
+	github.com/Valentin-Kaiser/go-core v1.4.6
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/robfig/cron/v3 v3.0.1
