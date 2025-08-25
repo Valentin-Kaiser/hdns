@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="hdns.png" width="365">
+  <img src="application/frontend/src/assets/hdns.png" width="365">
 </p>
 
 # HDNS - Hetzner Dynamic DNS Management
