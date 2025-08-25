@@ -137,6 +137,7 @@ func (e *Endpoint) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 		info: make(map[string]any),
 	})
 	if err != nil {
+		log.Error().Err(err).Msg("an api error occurred")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

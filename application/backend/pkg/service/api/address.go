@@ -16,6 +16,9 @@ func init() {
 			"/api/object/address",
 		}, map[string]Handler{
 			"GET": GetAddress,
+			"OPTIONS": func(context *Context) (interface{}, error) {
+				return nil, nil
+			},
 		})
 
 	RegisterEndpoint(
@@ -26,6 +29,9 @@ func init() {
 		}, map[string]Handler{
 			"GET":    GetHistory,
 			"DELETE": DeleteHistory,
+			"OPTIONS": func(context *Context) (interface{}, error) {
+				return nil, nil
+			},
 		})
 
 	RegisterEndpoint(

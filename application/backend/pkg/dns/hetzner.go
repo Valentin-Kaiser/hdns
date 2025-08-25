@@ -16,22 +16,14 @@ import (
 )
 
 const (
-	hetznerBaseURL = "https://dns.hetzner.com/api/v1/records"
+	hetznerBaseURL = "https://dns.hetzner.com/api/v1"
 )
 
 type client struct {
 	APIToken string
 }
 
-type Request struct {
-	APIToken     string
-	RecordZoneID string
-	RecordType   string
-	RecordName   string
-	RecordTTL    uint32 `json:",string"`
-}
-
-type Response struct {
+type Record struct {
 	ID     string `json:"id"`
 	ZoneID string `json:"zone_id"`
 	Type   string `json:"type"`
@@ -39,6 +31,12 @@ type Response struct {
 	Value  string `json:"value"`
 	TTL    uint32 `json:"ttl"`
 	Error  string `json:"error"`
+}
+
+type Zone struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	RecordsCount int    `json:"records_count"`
 }
 
 func UpdateRecord(r *model.Record, addr *model.Address) error {
@@ -60,6 +58,26 @@ func UpdateRecord(r *model.Record, addr *model.Address) error {
 	return nil
 }
 
+func FetchZones(token string) ([]Zone, error) {
+	c := &client{APIToken: token}
+	url := hetznerBaseURL + "/zones"
+	body, err := c.fetch(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	var res struct {
+		Zones []Zone `json:"zones"`
+		Error string `json:"error"`
+	}
+	if err := json.Unmarshal(body, &res); err != nil {
+		return nil, apperror.NewError("unmarshal response failed").AddError(err)
+	}
+	if res.Error != "" {
+		return nil, apperror.NewError("zones not found").AddError(apperror.NewError(res.Error))
+	}
+	return res.Zones, nil
+}
+
 func updateHetzner(r *model.Record, ip string) error {
 	c := &client{APIToken: r.Token.String()}
 	rec, found, err := c.findRecord(r.ZoneID, r.Name)
@@ -67,7 +85,7 @@ func updateHetzner(r *model.Record, ip string) error {
 		return apperror.Wrap(err)
 	}
 	if !found {
-		newRecord := &Response{
+		newRecord := &Record{
 			ZoneID: r.ZoneID,
 			Type:   string(r.Type),
 			Name:   r.Name,
@@ -81,12 +99,12 @@ func updateHetzner(r *model.Record, ip string) error {
 	return c.updateRecord(rec)
 }
 
-func (c *client) updateRecord(record *Response) error {
+func (c *client) updateRecord(record *Record) error {
 	data, err := json.Marshal(record)
 	if err != nil {
 		return apperror.NewError("marshaling the update record failed").AddError(err)
 	}
-	url := hetznerBaseURL + "/" + record.ID
+	url := hetznerBaseURL + "/records/" + record.ID
 	body, err := c.fetch(http.MethodPut, url, data)
 	if err != nil {
 		return apperror.NewError("updating the record failed").AddError(err)
@@ -94,7 +112,7 @@ func (c *client) updateRecord(record *Response) error {
 	return c.handleAPIResponse(body, "update")
 }
 
-func (c *client) createRecord(record *Response) error {
+func (c *client) createRecord(record *Record) error {
 	if err := c.validateRecord(record); err != nil {
 		return err
 	}
@@ -102,22 +120,22 @@ func (c *client) createRecord(record *Response) error {
 	if err != nil {
 		return apperror.NewError("marshaling the create record failed").AddError(err)
 	}
-	body, err := c.fetch(http.MethodPost, hetznerBaseURL, data)
+	body, err := c.fetch(http.MethodPost, hetznerBaseURL+"/records", data)
 	if err != nil {
 		return err
 	}
 	return c.handleAPIResponse(body, "create")
 }
 
-func (c *client) findRecord(zoneID, recordName string) (*Response, bool, error) {
-	url := fmt.Sprintf("%s?zone_id=%s&name=%s", hetznerBaseURL, zoneID, recordName)
+func (c *client) findRecord(zoneID, recordName string) (*Record, bool, error) {
+	url := fmt.Sprintf("%s?zone_id=%s&name=%s", hetznerBaseURL+"/records", zoneID, recordName)
 	body, err := c.fetch(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, false, err
 	}
 	var res struct {
-		Records []Response `json:"records"`
-		Error   string     `json:"error"`
+		Records []Record `json:"records"`
+		Error   string   `json:"error"`
 	}
 	if err := json.Unmarshal(body, &res); err != nil {
 		return nil, false, apperror.NewError("unmarshal response failed").AddError(err)
@@ -150,7 +168,7 @@ func (c *client) fetch(method, url string, body []byte) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-func (c *client) validateRecord(r *Response) error {
+func (c *client) validateRecord(r *Record) error {
 	switch {
 	case r.ZoneID == "":
 		return apperror.NewError("zone ID is required")
@@ -165,7 +183,7 @@ func (c *client) validateRecord(r *Response) error {
 }
 
 func (c *client) handleAPIResponse(body []byte, action string) error {
-	var r Response
+	var r Record
 	err := json.Unmarshal(body, &r)
 	if err != nil {
 		return apperror.NewErrorf("unmarshal response for %s action failed", action).AddError(err)

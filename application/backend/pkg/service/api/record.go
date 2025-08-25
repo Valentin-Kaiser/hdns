@@ -22,6 +22,9 @@ func init() {
 			"POST":   CreateRecord,
 			"PUT":    UpdateRecord,
 			"DELETE": DeleteRecord,
+			"OPTIONS": func(context *Context) (interface{}, error) {
+				return nil, nil
+			},
 		})
 
 	RegisterEndpoint(
@@ -31,6 +34,9 @@ func init() {
 			"/api/action/refresh/record/{id}",
 		}, map[string]Handler{
 			"GET": RefreshRecord,
+			"OPTIONS": func(context *Context) (interface{}, error) {
+				return nil, nil
+			},
 		})
 }
 
