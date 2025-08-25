@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Subscription, timer } from 'rxjs';
 import { ApiService } from '../global/services/api/api.service';
-import { Address, Zone as DnsZone, Record, RecordType } from '../global/services/api/model/object';
+import { Address, Config, Zone as DnsZone, Record, RecordType } from '../global/services/api/model/object';
 import { NotifyService } from '../global/services/notify/notify.service';
 
 @Component({
@@ -23,6 +23,18 @@ export class MainPage implements OnInit, OnDestroy {
   isLoading = true;
   isRefreshing = false;
   tokenError = false;
+  
+  // Configuration and logs states
+  showConfig = false;
+  showLogs = false;
+  config: Config = null;
+  originalConfig: Config | null = null;
+  isLoadingConfig = false;
+  isSavingConfig = false;
+  
+  logs = '';
+  isLoadingLogs = false;
+  isRefreshingLogs = false;
   
   private autoRefreshSubscription?: Subscription;
   
@@ -351,5 +363,101 @@ export class MainPage implements OnInit, OnDestroy {
 
   trackByRecordId(index: number, record: Record): number {
     return record.id;
+  }
+
+  // Configuration methods
+  toggleConfig() {
+    this.showConfig = !this.showConfig;
+    if (this.showConfig && !this.originalConfig) {
+      this.loadConfig();
+    }
+    if (this.showConfig) {
+      this.showLogs = false; // Close logs when opening config
+    }
+  }
+
+  private loadConfig() {
+    this.isLoadingConfig = true;
+    this.apiService.getConfig().subscribe({
+      next: (config: Config) => {
+        this.config = { ...config };
+        this.originalConfig = { ...config };
+        this.isLoadingConfig = false;
+      },
+      error: (error) => {
+        console.error('Failed to load config:', error);
+        this.notifyService.presentErrorToast('Failed to load configuration', 'Error');
+        this.isLoadingConfig = false;
+      }
+    });
+  }
+
+  hasConfigChanges(): boolean {
+    if (!this.originalConfig) return false;
+    return JSON.stringify(this.config) !== JSON.stringify(this.originalConfig);
+  }
+
+  saveConfig() {
+    if (this.isSavingConfig) return;
+
+    this.isSavingConfig = true;
+    this.apiService.updateConfig(this.config).subscribe({
+      next: (updatedConfig: Config) => {
+        this.config = { ...updatedConfig };
+        this.originalConfig = { ...updatedConfig };
+        this.isSavingConfig = false;
+        this.notifyService.presentToast('Configuration updated successfully', 'Success');
+      },
+      error: (error) => {
+        console.error('Failed to update config:', error);
+        this.notifyService.presentErrorToast('Failed to update configuration', 'Error');
+        this.isSavingConfig = false;
+      }
+    });
+  }
+
+  // Logs methods
+  toggleLogs() {
+    this.showLogs = !this.showLogs;
+    if (this.showLogs && !this.logs) {
+      this.loadLogs();
+    }
+    if (this.showLogs) {
+      this.showConfig = false; // Close config when opening logs
+    }
+  }
+
+  private loadLogs() {
+    this.isLoadingLogs = true;
+    this.apiService.getLog().subscribe({
+      next: (logs: string) => {
+        this.logs = logs || 'No logs available';
+        this.isLoadingLogs = false;
+      },
+      error: (error) => {
+        console.error('Failed to load logs:', error);
+        this.notifyService.presentErrorToast('Failed to load logs', 'Error');
+        this.logs = 'Failed to load logs';
+        this.isLoadingLogs = false;
+      }
+    });
+  }
+
+  refreshLogs() {
+    if (this.isRefreshingLogs) return;
+
+    this.isRefreshingLogs = true;
+    this.apiService.getLog().subscribe({
+      next: (logs: string) => {
+        this.logs = logs || 'No logs available';
+        this.isRefreshingLogs = false;
+        this.notifyService.presentToast('Logs refreshed', 'Success');
+      },
+      error: (error) => {
+        console.error('Failed to refresh logs:', error);
+        this.notifyService.presentErrorToast('Failed to refresh logs', 'Error');
+        this.isRefreshingLogs = false;
+      }
+    });
   }
 }

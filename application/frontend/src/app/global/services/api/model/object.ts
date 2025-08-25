@@ -36,3 +36,9 @@ export enum RecordType {
     NS = "NS"
 }
 
+export interface Config {
+    log_level: number;
+    web_port: number;
+    refresh_interval: string;
+    dns_server: string;
+}

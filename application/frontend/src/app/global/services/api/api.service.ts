@@ -74,6 +74,18 @@ export class ApiService {
         return this.delete(`object/record/${record.id}`);
     }
 
+    public getConfig(): Observable<any> {
+        return this.get("object/config");
+    }
+
+    public updateConfig(config: any): Observable<any> {
+        return this.put("object/config", config);
+    }
+
+    public getLog(): Observable<any> {
+        return this.get("object/log");
+    }
+
     /**
      * Generic API call methods
      */

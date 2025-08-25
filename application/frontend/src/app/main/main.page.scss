@@ -211,91 +211,88 @@ ion-content {
     }
 }
 
-// Add Record Card
-.add-record-card {
+// Unified Form Card
+.form-card {
     margin: 8px;
     border-radius: var(--hdns-card-border-radius);
     box-shadow: var(--hdns-card-shadow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 2px dashed var(--ion-color-step-200);
-    cursor: pointer;
-    position: relative;
     overflow: hidden;
-    min-height: 100px;
-    max-height: 115px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    // Default form card styling (DNS record, config, logs)
+    border: 1px solid var(--ion-color-primary);
 
-    &:hover {
-        border-color: var(--ion-color-primary);
-        transform: translateY(-2px);
-        box-shadow: var(--hdns-card-shadow-hover);
-
-        &::before {
-            opacity: 1;
-        }
-    }
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: var(--hdns-gradient-secondary);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        z-index: 0;
-    }
-
-    .add-content {
+    // Add record variant
+    &.add-record {
+        border: 2px dashed var(--ion-color-step-200);
+        cursor: pointer;
         position: relative;
-        z-index: 1;
+        min-height: 100px;
+        max-height: 115px;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        text-align: center;
-        padding: 24px 16px;
 
-        ion-icon {
-            font-size: 32px;
-            color: var(--ion-color-primary);
-            margin-bottom: 8px;
+        &:hover {
+            border-color: var(--ion-color-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--hdns-card-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+
+            .add-content {
+                ion-icon,
+                .add-title,
+                .add-subtitle {
+                    color: white;
+                }
+            }
         }
 
-        .add-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--ion-color-step-850);
-            margin-bottom: 4px;
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--hdns-gradient-secondary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
         }
 
-        .add-subtitle {
-            font-size: 12px;
-            color: var(--ion-color-medium);
+        .add-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px 16px;
+
+            ion-icon {
+                font-size: 32px;
+                color: var(--ion-color-primary);
+                margin-bottom: 8px;
+            }
+
+            .add-title {
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--ion-color-step-850);
+                margin-bottom: 4px;
+            }
+
+            .add-subtitle {
+                font-size: 12px;
+                color: var(--ion-color-medium);
+            }
         }
     }
-
-    &:hover .add-content {
-
-        ion-icon,
-        .add-title,
-        .add-subtitle {
-            color: white;
-        }
-    }
-}
-
-// New Record Form
-.new-record-form {
-    margin: 8px;
-    border-radius: var(--hdns-card-border-radius);
-    box-shadow: var(--hdns-card-shadow);
-    overflow: hidden;
-    border: 1px solid var(--ion-color-primary);
 
     .form-header {
         background: var(--hdns-gradient-secondary);
@@ -309,9 +306,18 @@ ion-content {
             font-size: 16px;
             font-weight: 600;
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .close-button {
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .close-button, ion-button {
             --color: rgba(255, 255, 255, 0.9);
             --padding-start: 8px;
             --padding-end: 8px;
@@ -327,25 +333,11 @@ ion-content {
             opacity: 0;
             animation: slideIn 0.4s ease forwards;
 
-            &:nth-child(1) {
-                animation-delay: 0.1s;
-            }
-
-            &:nth-child(2) {
-                animation-delay: 0.2s;
-            }
-
-            &:nth-child(3) {
-                animation-delay: 0.3s;
-            }
-
-            &:nth-child(4) {
-                animation-delay: 0.4s;
-            }
-
-            &:nth-child(5) {
-                animation-delay: 0.5s;
-            }
+            &:nth-child(1) { animation-delay: 0.1s; }
+            &:nth-child(2) { animation-delay: 0.2s; }
+            &:nth-child(3) { animation-delay: 0.3s; }
+            &:nth-child(4) { animation-delay: 0.4s; }
+            &:nth-child(5) { animation-delay: 0.5s; }
 
             ion-item {
                 --border-style: none;
@@ -379,6 +371,24 @@ ion-content {
             }
         }
 
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--ion-color-light-shade);
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            min-height: 200px;
+        }
+
         .create-button {
             margin-top: 16px;
             width: 100%;
@@ -386,6 +396,31 @@ ion-content {
             --border-radius: 8px;
             font-weight: 600;
             letter-spacing: 0.5px;
+        }
+
+        // Logs specific styles
+        &.logs-content-wrapper {
+            padding: 0;
+        }
+
+        .logs-content {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 16px;
+
+            .log-text {
+                font-family: 'Courier New', Monaco, monospace;
+                font-size: 12px;
+                line-height: 1.4;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                margin: 0;
+                padding: 12px;
+                background-color: var(--ion-color-light);
+                border-radius: 8px;
+                border: 1px solid var(--ion-color-light-shade);
+                color: var(--ion-color-dark);
+            }
         }
     }
 }
@@ -397,8 +432,7 @@ ion-content {
     }
 
     .record-card,
-    .add-record-card,
-    .new-record-form {
+    .form-card {
         margin: 8px 0;
     }
 }
@@ -463,4 +497,18 @@ ion-content {
 
 .record-updated {
     color: var(--ion-color-success) !important;
+}
+
+// Spinning animation for refresh button
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }

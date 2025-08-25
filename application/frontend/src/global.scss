@@ -177,3 +177,17 @@ cdk-virtual-scroll-viewport {
     position: unset !important;
     contain: unset !important;
 }
+
+// Modal styles
+.config-modal ion-modal {
+    --width: 90%;
+    --max-width: 600px;
+    --height: auto;
+    --max-height: 80vh;
+}
+
+.logs-modal ion-modal {
+    --width: 95%;
+    --max-width: 1000px;
+    --height: 80vh;
+}

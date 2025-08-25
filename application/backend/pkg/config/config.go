@@ -16,10 +16,10 @@ type ServerConfig struct {
 }
 
 type ServiceConfig struct {
-	LogLevel  int8   `usage:"(0 = debug, 1 = info, 2 = warn, 3 = error, 4 = fatal, 5 = panic)"`
-	WebPort   uint16 `usage:"Port of the web server to listen on"`
-	Refresh   string `usage:"Refresh interval in cron format (e.g. @every minute)"`
-	DNSServer string `usage:"DNS server to use for lookups, e.g. 9.9.9.9:53"`
+	LogLevel  int8   `usage:"(0 = debug, 1 = info, 2 = warn, 3 = error, 4 = fatal, 5 = panic)" json:"log_level"`
+	WebPort   uint16 `usage:"Port of the web server to listen on" json:"web_port"`
+	Refresh   string `usage:"Refresh interval in cron format (e.g. @every minute)" json:"refresh_interval"`
+	DNSServer string `usage:"DNS server to use for lookups, e.g. 9.9.9.9:53" json:"dns_server"`
 }
 
 func Init() {
