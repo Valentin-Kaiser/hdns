@@ -21,24 +21,8 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <!-- Loading State -->
-  @if (isLoading) {
-  <ion-grid class="ion-no-padding ion-no-margin loading-skeleton">
-    <ion-row>
-      @for (i of [1,2,3,4]; track i) {
-      <ion-col size="12" size-md="6" size-lg="3">
-        <div class="skeleton-card"></div>
-      </ion-col>
-      }
-    </ion-row>
-  </ion-grid>
-  }
-
-  <!-- Main Content -->
-  @if (!isLoading) {
   <ion-grid class="ion-no-padding ion-no-margin">
-    <!-- Empty State -->
-    @if ((!records || records.length === 0 ) && !showAddForm) {
+    @if ((!records || records.length === 0 ) && !record) {
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-md="8" size-lg="6">
         <div class="empty-state">
@@ -57,32 +41,28 @@
     </ion-row>
     }
 
-    <!-- DNS Records Grid -->
     @if (records && records.length > 0) {
     <ion-row>
-      <!-- Existing DNS Records -->
       @for (record of records; track trackByRecordId($index, record)) {
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card class="record-card" [class.record-active]="isRecordActive(record)"
-          [class.record-inactive]="!isRecordActive(record)">
-          <div class="record-status" [class.status-active]="isRecordActive(record)"
-            [class.status-inactive]="!isRecordActive(record)"></div>
-
-          <!-- Action Buttons Bar -->
+        <ion-card class="record-card">
           <div class="record-actions-bar">
-            <ion-button size="small" fill="clear" color="primary" (click)="refreshRecord(record)" title="Refresh Record" class="action-btn">
+            <ion-button size="small" fill="clear" color="primary" (click)="refreshRecord(record)" title="Refresh Record"
+              class="action-btn">
               <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
             </ion-button>
-            <ion-button size="small" fill="clear" color="secondary" (click)="editRecordAction(record)" title="Edit Record" class="action-btn">
+            <ion-button size="small" fill="clear" color="secondary" (click)="editRecordAction(record)"
+              title="Edit Record" class="action-btn">
               <ion-icon name="create-outline" slot="icon-only"></ion-icon>
             </ion-button>
-            <ion-button size="small" fill="clear" color="danger" (click)="deleteRecord(record)" title="Delete Record" class="action-btn">
+            <ion-button size="small" fill="clear" color="danger" (click)="deleteRecord(record)" title="Delete Record"
+              class="action-btn">
               <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
             </ion-button>
           </div>
 
           <ion-card-header>
-            <ion-card-title [color]="isRecordActive(record) ? 'dns-active' : 'dns-inactive'">
+            <ion-card-title>
               <span>{{ record.name }}.{{ record.domain }}</span>
               <span class="record-type-badge" [style.background]="'var(--ion-color-' + getRecordTypeColor(record.type) + ')'"
                         [style.color]="'var(--ion-color-' + getRecordTypeColor(record.type) + '-contrast)'">
@@ -92,14 +72,20 @@
           </ion-card-header>
 
           <ion-card-content>
-            <ion-card-subtitle>
-              <div class="last-updated">
-                <ion-icon name="time-outline"></ion-icon>
-                <span>last update {{ getLastUpdatedText(record.updated_at) }}</span>
-              </div>
-            </ion-card-subtitle>
-
             <div class="record-details">
+              <div class="detail-item" [class.record-updated]="isRecordUpdated(record)" [class.record-outdated]="!isRecordUpdated(record)">
+                <ion-icon name="code-working-outline"></ion-icon>
+                <span class="detail-value">{{ record.address?.ip }}</span>
+              </div>
+              <div class="detail-item">
+                <ion-icon name="time-outline"></ion-icon>
+                <span class="detail-label">last update</span>
+                @if (isUpdated(record)) {
+                <span class="detail-value">{{ getLastUpdatedText(record.last_update) }}</span>
+                } @else {
+                <span class="detail-value">Never</span>
+                }
+              </div>
               <div class="detail-item">
                 <ion-icon name="timer-outline"></ion-icon>
                 <span class="detail-label">TTL:</span>
@@ -111,9 +97,8 @@
       </ion-col>
       }
 
-      <!-- Add New Record Card (Desktop) -->
       <ion-col size="12" size-md="6" size-lg="4" size-xl="3" class="ion-hide-sm-down">
-        @if (!showAddForm) {
+        @if (!record) {
         <ion-card class="add-record-card" (click)="addRecord()" button>
           <div class="add-content">
             <ion-icon name="add-circle-outline"></ion-icon>
@@ -126,14 +111,14 @@
     </ion-row>
     }
 
-    <!-- New Record Form -->
-    @if (showAddForm && newRecord) {
+    <!-- Record Form -->
+    @if (record) {
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-md="8" size-lg="6">
         <ion-card class="new-record-form">
           <div class="form-header">
-            <h3 class="form-title">Create New DNS Record</h3>
-            <ion-button class="close-button" fill="clear" (click)="cancelAddRecord()">
+            <h3 class="form-title">DNS Record</h3>
+            <ion-button class="close-button" fill="clear" (click)="cancel()">
               <ion-icon name="close-outline" slot="icon-only"></ion-icon>
             </ion-button>
           </div>
@@ -146,8 +131,8 @@
                 Hetzner API Token
               </div>
               <ion-item>
-                <ion-input type="password" placeholder="Enter your Hetzner API token" [(ngModel)]="newRecord.token"
-                  (ionInput)="onFormFieldChange()" fill="outline">
+                <ion-input type="password" placeholder="Enter your Hetzner API token" [(ngModel)]="record.token"
+                  debounce="300" (ionInput)="onFormFieldChange()" fill="outline">
                 </ion-input>
               </ion-item>
             </div>
@@ -172,9 +157,9 @@
                 Zone ID
               </div>
               <ion-item>
-                <ion-select type="text" placeholder="Enter DNS zone ID"
+                <ion-select type="text" placeholder="Enter DNS zone ID" [(ngModel)]="record.zone_id"
                   (ionChange)="setZone($event.detail.value); onFormFieldChange()" fill="outline" interface="popover">
-                  <ion-select-option *ngFor="let zone of zones" [value]="zone">
+                  <ion-select-option *ngFor="let zone of zones" [value]="zone.id">
                     {{ zone.name }}
                   </ion-select-option>
                 </ion-select>
@@ -190,8 +175,8 @@
                 Record Type
               </div>
               <ion-item>
-                <ion-select placeholder="Select record type" [(ngModel)]="newRecord.type"
-                  (ionChange)="onFormFieldChange()" fill="outline">
+                <ion-select placeholder="Select record type" [(ngModel)]="record.type" (ionChange)="onFormFieldChange()"
+                  fill="outline">
                   <ion-select-option value="A">A - IPv4 Address</ion-select-option>
                   <ion-select-option value="AAAA">AAAA - IPv6 Address</ion-select-option>
                   <ion-select-option value="CNAME">CNAME - Canonical Name</ion-select-option>
@@ -211,7 +196,7 @@
                 Record Name
               </div>
               <ion-item>
-                <ion-input type="text" placeholder="e.g., www, mail, api" [(ngModel)]="newRecord.name"
+                <ion-input type="text" placeholder="e.g., www, mail, api" [(ngModel)]="record.name"
                   (ionInput)="onFormFieldChange()" fill="outline">
                 </ion-input>
               </ion-item>
@@ -226,159 +211,22 @@
                 TTL (Time To Live)
               </div>
               <ion-item>
-                <ion-select placeholder="Select TTL" [(ngModel)]="newRecord.ttl"
-                  (ionSelectionChange)="onFormFieldChange()" fill="outline">
-                  <ion-select-option [value]="300">5 minutes (300s)</ion-select-option>
-                  <ion-select-option [value]="600">10 minutes (600s)</ion-select-option>
-                  <ion-select-option [value]="1800">30 minutes (1800s)</ion-select-option>
-                  <ion-select-option [value]="3600">1 hour (3600s)</ion-select-option>
-                  <ion-select-option [value]="86400">24 hours (86400s)</ion-select-option>
-                </ion-select>
+                <ion-input type="number" placeholder="Enter TTL in seconds" [(ngModel)]="record.ttl"
+                  (ionInput)="onFormFieldChange()" fill="outline" min="60" step="60">
+                </ion-input>
               </ion-item>
             </div>
             }
 
             <!-- Create Button -->
             @if (formSteps.ttl) {
-            <ion-button class="create-button" expand="block" (click)="createRecord()"
-              [disabled]="isCreatingRecord || !isFormValid()">
-              @if (isCreatingRecord) {
+            <ion-button class="create-button" expand="block" (click)="createRecord()" [disabled]="!isFormValid()">
+              @if (isLoading) {
               <ion-spinner name="crescent" slot="start"></ion-spinner>
-              Creating Record...
+              Saving Record...
               } @else {
               <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-              Create DNS Record
-              }
-            </ion-button>
-            }
-          </div>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-    }
-
-    <!-- Edit Record Form -->
-    @if (showEditForm && editRecord) {
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-md="8" size-lg="6">
-        <ion-card class="new-record-form">
-          <div class="form-header">
-            <h3 class="form-title">Edit DNS Record</h3>
-            <ion-button class="close-button" fill="clear" (click)="cancelEditRecord()">
-              <ion-icon name="close-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-          </div>
-
-          <div class="form-content">
-            <!-- Step 1: Hetzner Token -->
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">1</span>
-                Hetzner API Token
-              </div>
-              <ion-item>
-                <ion-input type="password" placeholder="Enter your Hetzner API token" [(ngModel)]="editRecord.token"
-                  (ionInput)="onEditFormFieldChange()" fill="outline">
-                </ion-input>
-              </ion-item>
-            </div>
-
-            <!-- Token Error Message -->
-            @if (editFormSteps.token && tokenError) {
-            <div class="form-step">
-              <ion-item color="danger">
-                <ion-icon name="warning-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <p>Invalid API token or no zones found. Please check your Hetzner API token.</p>
-                </ion-label>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 2: Zone ID -->
-            @if (editFormSteps.token && !tokenError) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">2</span>
-                Zone ID
-              </div>
-              <ion-item>
-                <ion-select type="text" placeholder="Enter DNS zone ID"
-                  (ionChange)="setEditZone($event.detail.value); onEditFormFieldChange()" fill="outline" interface="popover">
-                  <ion-select-option *ngFor="let zone of zones" [value]="zone">
-                    {{ zone.name }}
-                  </ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 3: Record Type -->
-            @if (editFormSteps.zoneId) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">3</span>
-                Record Type
-              </div>
-              <ion-item>
-                <ion-select placeholder="Select record type" [(ngModel)]="editRecord.type"
-                  (ionChange)="onEditFormFieldChange()" fill="outline">
-                  <ion-select-option value="A">A - IPv4 Address</ion-select-option>
-                  <ion-select-option value="AAAA">AAAA - IPv6 Address</ion-select-option>
-                  <ion-select-option value="CNAME">CNAME - Canonical Name</ion-select-option>
-                  <ion-select-option value="MX">MX - Mail Exchange</ion-select-option>
-                  <ion-select-option value="TXT">TXT - Text Record</ion-select-option>
-                  <ion-select-option value="NS">NS - Name Server</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 4: Record Name -->
-            @if (editFormSteps.type) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">4</span>
-                Record Name
-              </div>
-              <ion-item>
-                <ion-input type="text" placeholder="e.g., www, mail, api" [(ngModel)]="editRecord.name"
-                  (ionInput)="onEditFormFieldChange()" fill="outline">
-                </ion-input>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 5: TTL -->
-            @if (editFormSteps.name) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">5</span>
-                TTL (Time To Live)
-              </div>
-              <ion-item>
-                <ion-select placeholder="Select TTL" [(ngModel)]="editRecord.ttl"
-                  (ionSelectionChange)="onEditFormFieldChange()" fill="outline">
-                  <ion-select-option [value]="300">5 minutes (300s)</ion-select-option>
-                  <ion-select-option [value]="600">10 minutes (600s)</ion-select-option>
-                  <ion-select-option [value]="1800">30 minutes (1800s)</ion-select-option>
-                  <ion-select-option [value]="3600">1 hour (3600s)</ion-select-option>
-                  <ion-select-option [value]="86400">24 hours (86400s)</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Update Button -->
-            @if (editFormSteps.ttl) {
-            <ion-button class="create-button" expand="block" (click)="updateRecord()"
-              [disabled]="isUpdatingRecord || !isEditFormValid()">
-              @if (isUpdatingRecord) {
-              <ion-spinner name="crescent" slot="start"></ion-spinner>
-              Updating Record...
-              } @else {
-              <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-              Update DNS Record
+              Save DNS Record
               }
             </ion-button>
             }
@@ -388,10 +236,9 @@
     </ion-row>
     }
   </ion-grid>
-  }
 
   <!-- Floating Action Button for Mobile -->
-  @if (!showAddForm && !showEditForm && records && records.length > 0) {
+  @if (!record && records && records.length > 0) {
   <ion-fab class="fab-add ion-hide-md-up" vertical="bottom" horizontal="end">
     <ion-fab-button (click)="addRecord()">
       <ion-icon name="add"></ion-icon>

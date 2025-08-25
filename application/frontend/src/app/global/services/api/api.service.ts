@@ -67,7 +67,7 @@ export class ApiService {
     public updateRecord(record: Record): Observable<Record> {
         record.created_at = null
         record.updated_at = null
-        return this.put("object/record", record);
+        return this.put(`object/record`, record);
     }
 
     public deleteRecord(record: Record): Observable<any> {
@@ -86,8 +86,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} GET request error:`, response);
-                this.notifyService.presentErrorToast(response.error.message ? response.error.message : response.error, "Request Error");
-                return [];
+                throw new Error(response.error.message ? response.error.message : response.error);
             }));
     }
 
@@ -99,8 +98,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} POST request error:`, response);
-                this.notifyService.presentErrorToast(response.error.message ? response.error.message : response.error, "Request Error");
-                return [];
+                throw new Error(response.error.message ? response.error.message : response.error);
             }));
     }
 
@@ -112,8 +110,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} PUT request error:`, response);
-                this.notifyService.presentErrorToast(response.error.message ? response.error.message : response.error, "Request Error");
-                return [];
+                throw new Error(response.error.message ? response.error.message : response.error);
             }));
     }
 
@@ -125,8 +122,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} DELETE request error:`, response);
-                this.notifyService.presentErrorToast(response.error.message ? response.error.message : response.error, "Request Error");
-                return [];
+                throw new Error(response.error.message ? response.error.message : response.error);
             }));
     }
 

@@ -70,10 +70,25 @@ ion-content {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     position: relative;
+    min-height: 100px;
+    max-height: 115px;
+    display: flex;
+    flex-direction: column;
 
     &:hover {
         transform: translateY(-2px);
         box-shadow: var(--hdns-card-shadow-hover);
+        background: var(--hdns-gradient-primary);
+
+        ion-card-header ion-card-title,
+        ion-card-content ion-card-subtitle,
+        ion-card-content .detail-item {
+            color: white;
+        }
+
+        ion-card-content .detail-item .detail-value {
+            color: rgba(255, 255, 255, 0.9);
+        }
     }
 
     .record-status {
@@ -88,6 +103,9 @@ ion-content {
 
     ion-card-header {
         padding: 16px;
+        padding-bottom: 0;
+        position: relative;
+        z-index: 1;
 
         ion-card-title {
             font-size: 16px;
@@ -112,6 +130,11 @@ ion-content {
 
     ion-card-content {
         padding: 0 16px 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 1;
 
         ion-card-subtitle {
             color: var(--ion-color-medium);
@@ -155,9 +178,8 @@ ion-content {
         right: 0;
         display: flex;
         flex-direction: column;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255);
         backdrop-filter: blur(10px);
-        border-radius: 0 16px 16px 0;
         padding: 4px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         z-index: 10;
@@ -184,7 +206,7 @@ ion-content {
     // Dark mode support
     @media (prefers-color-scheme: dark) {
         .record-actions-bar {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0);
         }
     }
 }
@@ -199,6 +221,11 @@ ion-content {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    min-height: 100px;
+    max-height: 115px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
         border-color: var(--ion-color-primary);
@@ -217,7 +244,7 @@ ion-content {
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--hdns-gradient-primary);
+        background: var(--hdns-gradient-secondary);
         opacity: 0;
         transition: opacity 0.3s ease;
         z-index: 0;
@@ -230,7 +257,6 @@ ion-content {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 120px;
         text-align: center;
         padding: 24px 16px;
 
@@ -272,7 +298,7 @@ ion-content {
     border: 1px solid var(--ion-color-primary);
 
     .form-header {
-        background: var(--hdns-gradient-primary);
+        background: var(--hdns-gradient-secondary);
         color: white;
         padding: 16px;
         display: flex;
@@ -423,10 +449,18 @@ ion-content {
     bottom: 20px;
     right: 20px;
     z-index: 1000;
-    --background: var(--hdns-gradient-primary);
+    --background: var(--hdns-gradient-secondary);
     --box-shadow: 0 4px 16px rgba(213, 12, 45, 0.3);
 
     @media (min-width: 768px) {
         display: none;
     }
+}
+
+.record-outdated {
+    color: var(--ion-color-danger) !important;
+}
+
+.record-updated {
+    color: var(--ion-color-success) !important;
 }

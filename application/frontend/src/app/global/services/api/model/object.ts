@@ -17,6 +17,7 @@ export interface Record extends BaseModel {
     ttl: number;
     address_id?: number;
     address?: Address;
+    last_update: string; // ISO date string
 }
 
 export interface Zone {

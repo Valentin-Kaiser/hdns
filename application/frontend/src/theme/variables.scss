@@ -66,10 +66,11 @@
   --ion-color-dns-pending-tint: #ff751a;
 
   // Background gradients using Hetzner colors
-  --hdns-gradient-primary: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
-  --hdns-gradient-success: linear-gradient(135deg, var(--ion-color-dns-active) 0%, var(--ion-color-success) 100%);
-  --hdns-gradient-warning: linear-gradient(135deg, var(--ion-color-warning) 0%, var(--ion-color-dns-pending) 100%);
-  --hdns-gradient-danger: linear-gradient(135deg, var(--ion-color-danger) 0%, var(--ion-color-dns-inactive) 100%);
+  --hdns-gradient-primary: linear-gradient(90deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 90%, black 100%);
+  --hdns-gradient-secondary: linear-gradient(90deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+  --hdns-gradient-success: linear-gradient(90deg, var(--ion-color-dns-active) 0%, var(--ion-color-success) 100%);
+  --hdns-gradient-warning: linear-gradient(90deg, var(--ion-color-warning) 0%, var(--ion-color-dns-pending) 100%);
+  --hdns-gradient-danger: linear-gradient(90deg, var(--ion-color-danger) 0%, var(--ion-color-dns-inactive) 100%);
   
   // Card styling
   --hdns-card-border-radius: 16px;

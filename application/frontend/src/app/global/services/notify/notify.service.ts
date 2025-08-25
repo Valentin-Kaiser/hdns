@@ -306,10 +306,6 @@ export class NotifyService {
 	}
 
 	extractErrorMessage(error: string): string {
-		if (!error || typeof error !== 'string') {
-			return 'Unknown error';
-		}
-
 		const userPart = error.split('[')[0]?.split('|')[1]?.trim()
 		if (!userPart) {
 			return error;

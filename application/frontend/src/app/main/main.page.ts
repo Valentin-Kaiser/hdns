@@ -18,31 +18,15 @@ export class MainPage implements OnInit, OnDestroy {
 
   current: Address | null = null;
   records: Record[] = [];
-  newRecord: Partial<Record> | null = null;
-  editRecord: Record | null = null;
+  record: Record | null = null;
   zones: DnsZone[] = [];
   isLoading = true;
   isRefreshing = false;
-  isCreatingRecord = false;
-  isUpdatingRecord = false;
-  showAddForm = false;
-  showEditForm = false;
   tokenError = false;
   
-  // Auto-refresh subscription
   private autoRefreshSubscription?: Subscription;
   
-  // Form step validation
   formSteps = {
-    token: false,
-    zoneId: false,
-    type: false,
-    name: false,
-    ttl: false
-  };
-
-  // Edit form steps
-  editFormSteps = {
     token: false,
     zoneId: false,
     type: false,
@@ -137,67 +121,46 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   loadZones() {
-    if (!this.newRecord?.token) return;
-    
+    if (!this.record.token) return;
+
+    this.zones = [];
     this.tokenError = false;
-    this.apiService.zones(this.newRecord.token).subscribe({
+    this.apiService.zones(this.record.token).subscribe({
       next: (response) => {
         this.zones = response || [];
         this.tokenError = false;
         if (this.zones.length === 0) {
-          this.notifyService.presentErrorToast('No zones found for this API token', 'Token Validation');
           this.tokenError = true;
         }
       },
       error: (error) => {
-        console.error('Error loading zones:', error);
         this.tokenError = true;
         this.zones = [];
-        this.notifyService.presentErrorToast('Invalid API token or failed to load zones', 'Token Validation Error');
       }
     });
   }
 
   addRecord() {
-    this.showAddForm = true;
-    this.newRecord = {
-      id: 0,
-      created_at: "",
-      updated_at: "",
-      token: "",
-      zone_id: "",
-      type: null as any, // Will be set by user selection
-      domain: "",
-      name: "",
-      ttl: 300,
-    };
-    this.zones = [];
-    this.resetFormSteps();
-  }
-
-  cancelAddRecord() {
-    this.showAddForm = false;
-    this.newRecord = null;
-    this.tokenError = false;
+    this.record = {type: "A", ttl: 300} as Record;
     this.zones = [];
     this.resetFormSteps();
   }
 
   editRecordAction(record: Record) {
-    this.showEditForm = true;
-    this.editRecord = { ...record }; // Create a copy to avoid modifying the original
+    this.record = { ...record }; // Create a copy to avoid modifying the original
     this.zones = []; // Reset zones, will be loaded when token is validated
     this.tokenError = false;
-    this.resetEditFormSteps();
-    this.validateEditFormSteps();
+    this.loadZones();
+    this.resetFormSteps();
+    this.formSteps = { ...this.formSteps, token: true, zoneId: true, type: true, name: true, ttl: true };
+    this.validateFormSteps();
   }
 
-  cancelEditRecord() {
-    this.showEditForm = false;
-    this.editRecord = null;
+  cancel() {
+    this.record = null;
     this.tokenError = false;
     this.zones = [];
-    this.resetEditFormSteps();
+    this.resetFormSteps();
   }
 
   private resetFormSteps() {
@@ -210,72 +173,21 @@ export class MainPage implements OnInit, OnDestroy {
     };
   }
 
-  private resetEditFormSteps() {
-    this.editFormSteps = {
-      token: false,
-      zoneId: false,
-      type: false,
-      name: false,
-      ttl: false
-    };
-  }
-
   private validateFormSteps() {
-    if (!this.newRecord) return;
-    
-    this.formSteps.token = !!(this.newRecord.token && this.newRecord.token.trim().length > 0);
-    this.formSteps.zoneId = !!(this.newRecord.zone_id && this.newRecord.zone_id.trim().length > 0);
-    this.formSteps.type = !!(this.newRecord.type);
-    this.formSteps.name = !!(this.newRecord.name && this.newRecord.name.trim().length > 0);
-    this.formSteps.ttl = !!(this.newRecord.ttl && this.newRecord.ttl > 0);
-  }
+    if (!this.record) return;
 
-  private validateEditFormSteps() {
-    if (!this.editRecord) return;
-    
-    this.editFormSteps.token = !!(this.editRecord.token && this.editRecord.token.trim().length > 0);
-    this.editFormSteps.zoneId = !!(this.editRecord.zone_id && this.editRecord.zone_id.trim().length > 0);
-    this.editFormSteps.type = !!(this.editRecord.type);
-    this.editFormSteps.name = !!(this.editRecord.name && this.editRecord.name.trim().length > 0);
-    this.editFormSteps.ttl = !!(this.editRecord.ttl && this.editRecord.ttl > 0);
+    this.formSteps.token = !!(this.record.token && this.record.token.trim().length > 0);
+    this.formSteps.zoneId = !!(this.record.zone_id && this.record.zone_id.trim().length > 0);
+    this.formSteps.type = !!(this.record.type);
+    this.formSteps.name = !!(this.record.name && this.record.name.trim().length > 0);
+    this.formSteps.ttl = !!(this.record.ttl && this.record.ttl > 0);
   }
 
   onFormFieldChange() {
-    console.log('Form field changed:', this.newRecord);
     this.validateFormSteps();
     if (this.formSteps.token && !this.formSteps.zoneId) {
       this.loadZones();
     }
-  }
-
-  onEditFormFieldChange() {
-    console.log('Edit form field changed:', this.editRecord);
-    this.validateEditFormSteps();
-    if (this.editFormSteps.token && !this.editFormSteps.zoneId) {
-      this.loadZonesForEdit();
-    }
-  }
-
-  loadZonesForEdit() {
-    if (!this.editRecord?.token) return;
-    
-    this.tokenError = false;
-    this.apiService.zones(this.editRecord.token).subscribe({
-      next: (response) => {
-        this.zones = response || [];
-        this.tokenError = false;
-        if (this.zones.length === 0) {
-          this.notifyService.presentErrorToast('No zones found for this API token', 'Token Validation');
-          this.tokenError = true;
-        }
-      },
-      error: (error) => {
-        console.error('Error loading zones:', error);
-        this.tokenError = true;
-        this.zones = [];
-        this.notifyService.presentErrorToast('Invalid API token or failed to load zones', 'Token Validation Error');
-      }
-    });
   }
 
   isFormValid(): boolean {
@@ -283,39 +195,31 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   isEditFormValid(): boolean {
-    return Object.values(this.editFormSteps).every(step => step);
+    return Object.values(this.formSteps).every(step => step);
   }
 
-  setZone(zone: DnsZone) {
-    if (this.newRecord) {
-      this.newRecord.zone_id = zone.id;
-      this.newRecord.domain = zone.name;
+  setZone(zoneId: string) {
+    if (this.record) {
+      this.record.zone_id = zoneId;
+      this.record.domain = this.zones.find(zone => zone.id === zoneId)?.name || '';
       this.validateFormSteps();
     }
   }
 
-  setEditZone(zone: DnsZone) {
-    if (this.editRecord) {
-      this.editRecord.zone_id = zone.id;
-      this.editRecord.domain = zone.name;
-      this.validateEditFormSteps();
-    }
-  }
-
   createRecord() {
-    if (!this.newRecord || !this.isFormValid()) {
+    if (!this.record || !this.isFormValid()) {
       this.notifyService.presentErrorToast('Please fill in all required fields', 'Validation Error');
       return;
     }
 
-    this.isCreatingRecord = true;
+    this.isLoading = true;
 
-    this.apiService.createRecord(this.newRecord as Record).subscribe({
+    this.apiService.createRecord(this.record as Record).subscribe({
       next: (response) => {
         if (response) {
           this.records.push(response);
           this.notifyService.presentToast('DNS record created successfully', 'Success');
-          this.cancelAddRecord();
+          this.cancel();
         }
       },
       error: (error) => {
@@ -326,28 +230,28 @@ export class MainPage implements OnInit, OnDestroy {
         );
       },
       complete: () => {
-        this.isCreatingRecord = false;
+        this.isLoading = false;
       }
     });
   }
 
   updateRecord() {
-    if (!this.editRecord || !this.isEditFormValid()) {
+    if (!this.record || !this.isEditFormValid()) {
       this.notifyService.presentErrorToast('Please fill in all required fields', 'Validation Error');
       return;
     }
 
-    this.isUpdatingRecord = true;
+    this.isLoading = true;
 
-    this.apiService.updateRecord(this.editRecord).subscribe({
+    this.apiService.updateRecord(this.record).subscribe({
       next: (response) => {
         if (response) {
-          const index = this.records.findIndex(r => r.id === this.editRecord!.id);
+          const index = this.records.findIndex(r => r.id === this.record.id);
           if (index !== -1) {
             this.records[index] = response;
           }
           this.notifyService.presentToast('DNS record updated successfully', 'Success');
-          this.cancelEditRecord();
+          this.cancel();
         }
       },
       error: (error) => {
@@ -358,7 +262,7 @@ export class MainPage implements OnInit, OnDestroy {
         );
       },
       complete: () => {
-        this.isUpdatingRecord = false;
+        this.isLoading = false;
       }
     });
   }
@@ -402,7 +306,7 @@ export class MainPage implements OnInit, OnDestroy {
     });
   }
 
-  isRecordActive(record: Record): boolean {
+  isRecordUpdated(record: Record): boolean {
     return record.address_id === this.current?.id;
   }
 
@@ -439,6 +343,10 @@ export class MainPage implements OnInit, OnDestroy {
       const diffDays = Math.floor(diffHours / 24);
       return `${diffDays}d ago`;
     }
+  }
+
+  isUpdated(record: Record): boolean {
+    return record.last_update !== '0001-01-01T00:00:00Z';
   }
 
   trackByRecordId(index: number, record: Record): number {
