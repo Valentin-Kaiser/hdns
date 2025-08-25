@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"strings"
 
@@ -21,6 +22,12 @@ var static embed.FS
 func Start() {
 	defer interruption.Catch()
 
+	frontend, err := fs.Sub(static, "static")
+	if err != nil {
+		log.Error().Err(err).Msg("[Service] failed to create frontend file system")
+		return
+	}
+
 	done := make(chan error, 1)
 	s := web.Instance().
 		WithHost("").
@@ -30,7 +37,7 @@ func Start() {
 		WithGzip().
 		WithLog().
 		WithErrorLog().
-		WithFS([]string{"/"}, static).
+		WithFS([]string{"/"}, frontend).
 		WithWebsocket("/ws", func(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) {
 			defer conn.Close()
 		})

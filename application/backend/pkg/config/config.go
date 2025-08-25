@@ -27,8 +27,8 @@ func Init() {
 		Service: ServiceConfig{
 			LogLevel:  1,
 			WebPort:   8080,
-			Refresh:   "*/30 * * * *", // every 30 seconds
-			DNSServer: "9.9.9.9:53",   // DNS server for lookups
+			Refresh:   "*/30 * * * * *", // every 30 seconds
+			DNSServer: "9.9.9.9:53",     // DNS server for lookups
 		},
 		Database: database.Config{
 			Driver:   "sqlite",
