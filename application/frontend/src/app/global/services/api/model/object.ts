@@ -19,6 +19,12 @@ export interface Record extends BaseModel {
     address?: Address;
 }
 
+export interface Zone {
+    id: string;
+    name: string;
+    records_count: number;
+}
+
 export enum RecordType {
     Unknown = "",
     A = "A",

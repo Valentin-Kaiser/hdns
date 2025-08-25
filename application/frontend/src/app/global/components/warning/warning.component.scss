@@ -1,0 +1,68 @@
+.warning-modal-content {
+  .warning-header {
+    ion-toolbar {
+      --background: var(--ion-color-warning);
+      --color: var(--ion-color-warning-contrast);
+      
+      .header-icon {
+        margin-right: 8px;
+        font-size: 20px;
+      }
+    }
+  }
+
+  .warning-content {
+    --background: var(--ion-color-step-50);
+    --padding-top: 0;
+    --padding-bottom: 0;
+    
+    .warning-message {
+      display: flex;
+      align-items: flex-start;
+      background: rgba(255, 196, 9, 0.1);
+      border: 1px solid rgba(255, 196, 9, 0.3);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px;
+      
+      .message-icon {
+        font-size: 24px;
+        color: var(--ion-color-warning);
+        margin-right: 12px;
+        margin-top: 2px;
+        min-width: 24px;
+      }
+      
+      .message-text {
+        flex: 1;
+        
+        h2 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 1.5;
+          color: var(--ion-color-step-800);
+        }
+        
+        p {
+          margin: 8px 0 0 0;
+          font-size: 14px;
+          color: var(--ion-color-step-600);
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+
+  .warning-footer {
+    ion-toolbar {
+      --background: var(--ion-color-step-100);
+      --border-color: var(--ion-color-step-200);
+      border-top: 1px solid var(--border-color);
+      
+      ion-buttons {
+        gap: 8px;
+      }
+    }
+  }
+}

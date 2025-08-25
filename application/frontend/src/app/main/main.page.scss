@@ -1,3 +1,4 @@
+// Reset grid padding/margins for custom layout
 ion-grid,
 ion-row,
 ion-col {
@@ -5,17 +6,402 @@ ion-col {
     --margin-end: 0;
     --margin-top: 0;
     --margin-bottom: 0;
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-
+    margin: 0;
     --padding-start: 0;
     --padding-end: 0;
     --padding-top: 0;
     --padding-bottom: 0;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 0;
+}
+
+// Header styling
+ion-header ion-toolbar {
+    --background: var(--hdns-gradient-primary);
+    --color: white;
+
+    ion-title {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    ion-button {
+        --color: rgba(255, 255, 255, 0.9);
+    }
+}
+
+// Content area
+ion-content {
+    --background: linear-gradient(180deg, rgba(213, 12, 45, 0.05) 0%, transparent 50%);
+
+    ion-grid {
+        padding: 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+// Empty state
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+    color: var(--ion-color-medium);
+
+    ion-icon {
+        font-size: 32px;
+        margin-bottom: 16px;
+        opacity: 0.6;
+    }
+
+    ion-label {
+        font-size: 18px;
+        font-weight: 500;
+    }
+}
+
+// DNS Record Cards
+.record-card {
+    margin: 8px;
+    border-radius: var(--hdns-card-border-radius);
+    box-shadow: var(--hdns-card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--hdns-card-shadow-hover);
+    }
+
+    .record-status {
+        &.status-active {
+            border-left: 12px solid var(--ion-color-dns-active);
+        }
+
+        &.status-inactive {
+            border-left: 12px solid var(--ion-color-dns-inactive);
+        }
+    }
+
+    ion-card-header {
+        padding: 16px;
+
+        ion-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .record-type-badge {
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 6px;
+                background: var(--ion-color-light);
+                color: var(--ion-color-dark);
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+        }
+    }
+
+    ion-card-content {
+        padding: 0 16px 16px;
+
+        ion-card-subtitle {
+            color: var(--ion-color-medium);
+            font-size: 12px;
+            margin: 0;
+
+            .last-updated {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+        }
+
+        .record-details {
+            margin-top: 8px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: var(--ion-color-step-600);
+
+            ion-icon {
+                font-size: 14px;
+                min-width: 14px;
+            }
+
+            .detail-value {
+                font-weight: 500;
+                color: var(--ion-color-step-850);
+            }
+        }
+    }
+
+    .record-actions {
+        padding: 12px 16px;
+        border-top: 1px solid var(--ion-color-step-100);
+        display: flex;
+        gap: 8px;
+
+        ion-button {
+            --padding-start: 12px;
+            --padding-end: 12px;
+            height: 32px;
+            font-size: 12px;
+        }
+    }
+}
+
+// Add Record Card
+.add-record-card {
+    margin: 8px;
+    border-radius: var(--hdns-card-border-radius);
+    box-shadow: var(--hdns-card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px dashed var(--ion-color-step-200);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+        border-color: var(--ion-color-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--hdns-card-shadow-hover);
+
+        &::before {
+            opacity: 1;
+        }
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--hdns-gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    .add-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+        text-align: center;
+        padding: 24px 16px;
+
+        ion-icon {
+            font-size: 32px;
+            color: var(--ion-color-primary);
+            margin-bottom: 8px;
+        }
+
+        .add-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ion-color-step-850);
+            margin-bottom: 4px;
+        }
+
+        .add-subtitle {
+            font-size: 12px;
+            color: var(--ion-color-medium);
+        }
+    }
+
+    &:hover .add-content {
+
+        ion-icon,
+        .add-title,
+        .add-subtitle {
+            color: white;
+        }
+    }
+}
+
+// New Record Form
+.new-record-form {
+    margin: 8px;
+    border-radius: var(--hdns-card-border-radius);
+    box-shadow: var(--hdns-card-shadow);
+    overflow: hidden;
+    border: 1px solid var(--ion-color-primary);
+
+    .form-header {
+        background: var(--hdns-gradient-primary);
+        color: white;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .form-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close-button {
+            --color: rgba(255, 255, 255, 0.9);
+            --padding-start: 8px;
+            --padding-end: 8px;
+            margin: 0;
+        }
+    }
+
+    .form-content {
+        padding: 16px;
+
+        .form-step {
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: slideIn 0.4s ease forwards;
+
+            &:nth-child(1) {
+                animation-delay: 0.1s;
+            }
+
+            &:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            &:nth-child(3) {
+                animation-delay: 0.3s;
+            }
+
+            &:nth-child(4) {
+                animation-delay: 0.4s;
+            }
+
+            &:nth-child(5) {
+                animation-delay: 0.5s;
+            }
+
+            ion-item {
+                --border-style: none;
+                --inner-border-width: 0;
+                --background: var(--ion-color-step-50);
+                border-radius: 8px;
+                margin-bottom: 8px;
+            }
+
+            .step-label {
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--ion-color-step-700);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+
+                .step-number {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: var(--ion-color-primary);
+                    color: white;
+                    font-size: 10px;
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .create-button {
+            margin-top: 16px;
+            width: 100%;
+            height: 44px;
+            --border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+    }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    ion-col[size="3"] {
+        size: 12;
+    }
+
+    .record-card,
+    .add-record-card,
+    .new-record-form {
+        margin: 8px 0;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    ion-col[size="3"] {
+        size: 6;
+    }
+}
+
+// Loading state
+.loading-skeleton .skeleton-card {
+    margin: 8px;
+    border-radius: var(--hdns-card-border-radius);
+    background: var(--ion-color-step-100);
+    height: 120px;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// Animations
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+// Floating Action Button for mobile
+.fab-add {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    --background: var(--hdns-gradient-primary);
+    --box-shadow: 0 4px 16px rgba(213, 12, 45, 0.3);
+
+    @media (min-width: 768px) {
+        display: none;
+    }
 }

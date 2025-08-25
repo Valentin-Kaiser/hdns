@@ -54,11 +54,19 @@ export class ApiService {
         return this.get("object/record");
     }
 
+    public zones(token: string): Observable<Zone[]> {
+        return this.get(`object/zone/${token}`);
+    }
+
     public createRecord(record: Record): Observable<Record> {
+        record.created_at = null
+        record.updated_at = null
         return this.post("object/record", record);
     }
 
     public updateRecord(record: Record): Observable<Record> {
+        record.created_at = null
+        record.updated_at = null
         return this.put("object/record", record);
     }
 

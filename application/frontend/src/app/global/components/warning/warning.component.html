@@ -1,21 +1,39 @@
-<ion-grid class="ion-padding">
-  <ion-row>
-    <ion-col class="ion-margin">
-      <ion-label>
-        <h2 [innerHTML]="safeMessage"></h2>
-      </ion-label>
-    </ion-col>
-  </ion-row>
-  <ion-row class="ion-justify-content-end">
-    <ion-col size="auto" *ngIf="leftButtonLabel">
-      <ion-button (click)="doOnLeft()" [color]="leftButtonColor" size="small" fill="clear">
-        {{ leftButtonLabel }}
-      </ion-button>
-    </ion-col>
-    <ion-col size="auto" *ngIf="rightButtonLabel">
-      <ion-button (click)="doOnRight()" [color]="rightButtonColor" size="small" fill="clear">
-        {{ rightButtonLabel }}
-      </ion-button>
-    </ion-col>
-  </ion-row>
-</ion-grid>
+<div class="warning-modal-content">
+  <ion-header class="warning-header">
+    <ion-toolbar color="warning">
+      <ion-title>
+        <ion-icon name="warning-outline" class="header-icon"></ion-icon>
+        Confirmation Required
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="warning-content">
+    <div class="warning-message">
+      <ion-icon name="help-circle-outline" class="message-icon"></ion-icon>
+      <div class="message-text" [innerHTML]="safeMessage"></div>
+    </div>
+  </ion-content>
+
+  <ion-footer class="warning-footer">
+    <ion-toolbar>
+      <ion-buttons slot="end">
+        @if (leftButtonLabel) {
+          <ion-button 
+            (click)="doOnLeft()" 
+            [color]="leftButtonColor || 'medium'"
+            fill="outline">
+            {{ leftButtonLabel }}
+          </ion-button>
+        }
+        @if (rightButtonLabel) {
+          <ion-button 
+            (click)="doOnRight()" 
+            [color]="rightButtonColor || 'primary'">
+            {{ rightButtonLabel }}
+          </ion-button>
+        }
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-footer>
+</div>
