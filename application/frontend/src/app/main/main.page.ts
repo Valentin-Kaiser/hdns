@@ -49,7 +49,8 @@ export class MainPage implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private notifyService: NotifyService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     this.loadInitialData();
@@ -74,7 +75,7 @@ export class MainPage implements OnInit, OnDestroy {
       this.records = records || [];
     }).catch(error => {
       console.error('Error loading initial data:', error);
-      this.notifyService.presentErrorToast('Failed to load data', 'Error');
+      this.notifyService.presentErrorToast("Failed to load records", error);
     }).finally(() => {
       this.isLoading = false;
     });
@@ -111,10 +112,10 @@ export class MainPage implements OnInit, OnDestroy {
     ]).then(([address, records]) => {
       this.current = address || null;
       this.records = records || [];
-      this.notifyService.presentToast("Data refreshed successfully", "Success");
+      this.notifyService.presentToast("Data refreshed successfully");
     }).catch(error => {
       console.error('Refresh error:', error);
-      this.notifyService.presentErrorToast('Failed to refresh data', 'Error');
+      this.notifyService.presentErrorToast("Failed to refresh data", error);
     }).finally(() => {
       this.isRefreshing = false;
     });
@@ -127,7 +128,7 @@ export class MainPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading records:', error);
-        this.notifyService.presentErrorToast('Failed to load records', 'Error');
+        this.notifyService.presentErrorToast("Failed to load records", error);
       }
     });
   }
@@ -153,7 +154,7 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   addRecord() {
-    this.record = { type: "A", ttl: 300 } as Record;
+    this.record = {} as Record;
     this.zones = [];
     this.resetFormSteps();
   }
@@ -197,12 +198,13 @@ export class MainPage implements OnInit, OnDestroy {
 
   private validateFormSteps() {
     if (!this.record) return;
-
+    console.log(this.record)
     this.formSteps.token = !!(this.record.token && this.record.token.trim().length > 0);
     this.formSteps.zoneId = !!(this.record.zone_id && this.record.zone_id.trim().length > 0);
     this.formSteps.type = !!(this.record.type);
     this.formSteps.name = !!(this.record.name && this.record.name.trim().length > 0);
     this.formSteps.ttl = !!(this.record.ttl && this.record.ttl > 0);
+    console.log(this.formSteps);
   }
 
   onFormFieldChange() {
@@ -230,7 +232,7 @@ export class MainPage implements OnInit, OnDestroy {
 
   createRecord() {
     if (!this.record || !this.isFormValid()) {
-      this.notifyService.presentErrorToast('Please fill in all required fields', 'Validation Error');
+      this.notifyService.presentErrorToast('Form Validation Error', 'Please fill in all required fields');
       return;
     }
 
@@ -240,16 +242,12 @@ export class MainPage implements OnInit, OnDestroy {
       next: (response) => {
         if (response) {
           this.records.push(response);
-          this.notifyService.presentToast('DNS record created successfully', 'Success');
+          this.notifyService.presentToast('DNS record created successfully');
           this.cancel();
         }
       },
       error: (error) => {
-        console.error('Create record error:', error);
-        this.notifyService.presentErrorToast(
-          error.error?.message || 'Failed to create DNS record',
-          'Creation Error'
-        );
+        this.notifyService.presentErrorToast('Failed to create DNS record', error);
       },
       complete: () => {
         this.isLoading = false;
@@ -259,7 +257,7 @@ export class MainPage implements OnInit, OnDestroy {
 
   updateRecord() {
     if (!this.record || !this.isEditFormValid()) {
-      this.notifyService.presentErrorToast('Please fill in all required fields', 'Validation Error');
+      this.notifyService.presentErrorToast('Form Validation Error', 'Please fill in all required fields');
       return;
     }
 
@@ -272,15 +270,15 @@ export class MainPage implements OnInit, OnDestroy {
           if (index !== -1) {
             this.records[index] = response;
           }
-          this.notifyService.presentToast('DNS record updated successfully', 'Success');
+          this.notifyService.presentToast('DNS record updated successfully');
           this.cancel();
         }
       },
       error: (error) => {
         console.error('Update record error:', error);
         this.notifyService.presentErrorToast(
-          error.error?.message || 'Failed to update DNS record',
-          'Update Error'
+          'Update Error',
+          error || 'Failed to update DNS record'
         );
       },
       complete: () => {
@@ -295,14 +293,14 @@ export class MainPage implements OnInit, OnDestroy {
         const index = this.records.findIndex(r => r.id === record.id);
         if (index !== -1 && updatedRecord) {
           this.records[index] = updatedRecord;
-          this.notifyService.presentToast(`Record ${record.name}.${record.domain} refreshed`, 'Success');
+          this.notifyService.presentToast(`Record ${record.name}.${record.domain} refreshed`);
         }
       },
       error: (error) => {
         console.error('Refresh record error:', error);
         this.notifyService.presentErrorToast(
-          `Failed to refresh record ${record.name}.${record.domain}`,
-          'Refresh Error'
+          'Refresh Error',
+          `Failed to refresh record ${record.name}.${record.domain}`
         );
       }
     });
@@ -322,8 +320,8 @@ export class MainPage implements OnInit, OnDestroy {
           error: (error) => {
             console.error('Delete record error:', error);
             this.notifyService.presentErrorToast(
-              `Failed to delete record ${record.name}.${record.domain}`,
-              'Delete Error'
+              'Delete Error',
+              `Failed to delete record ${record.name}.${record.domain}`
             );
           }
         });
@@ -332,6 +330,7 @@ export class MainPage implements OnInit, OnDestroy {
       "Delete",
       "medium",
       "danger",
+      "This will not delete the record from the Hetzner DNS"
     )
   }
 
@@ -403,7 +402,7 @@ export class MainPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load config:', error);
-        this.notifyService.presentErrorToast('Failed to load configuration', 'Error');
+        this.notifyService.presentErrorToast('Configuration Error', 'Failed to load configuration');
         this.isLoadingConfig = false;
       }
     });
@@ -427,7 +426,7 @@ export class MainPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to update config:', error);
-        this.notifyService.presentErrorToast('Failed to update configuration', 'Error');
+        this.notifyService.presentErrorToast('Configuration Error', 'Failed to update configuration');
         this.isSavingConfig = false;
       }
     });
@@ -453,7 +452,7 @@ export class MainPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load logs:', error);
-        this.notifyService.presentErrorToast('Failed to load logs', 'Error');
+        this.notifyService.presentErrorToast('Logs Error', 'Failed to load logs');
         this.logs = 'Failed to load logs';
         this.isLoadingLogs = false;
       }
@@ -472,7 +471,7 @@ export class MainPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to refresh logs:', error);
-        this.notifyService.presentErrorToast('Failed to refresh logs', 'Error');
+        this.notifyService.presentErrorToast('Logs Error', 'Failed to refresh logs');
         this.isRefreshingLogs = false;
       }
     });

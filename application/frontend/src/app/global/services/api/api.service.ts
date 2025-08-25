@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { NavController } from "@ionic/angular";
-import { catchError, Observable, tap } from "rxjs";
+import { catchError, Observable, tap, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
 import { LoggerService } from "../logger/logger.service";
 import { NotifyService } from "../notify/notify.service";
@@ -98,7 +98,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} GET request error:`, response);
-                throw new Error(response.error.message ? response.error.message : response.error);
+                return throwError(() => response?.error?.message);
             }));
     }
 
@@ -110,7 +110,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} POST request error:`, response);
-                throw new Error(response.error.message ? response.error.message : response.error);
+                return throwError(() => response?.error?.message);
             }));
     }
 
@@ -122,7 +122,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} PUT request error:`, response);
-                throw new Error(response.error.message ? response.error.message : response.error);
+                return throwError(() => response?.error?.message);
             }));
     }
 
@@ -134,7 +134,7 @@ export class ApiService {
             }),
             catchError((response) => {
                 this.logger.error(`${this.logType} ${this.logName} DELETE request error:`, response);
-                throw new Error(response.error.message ? response.error.message : response.error);
+                return throwError(() => response?.error?.message);
             }));
     }
 

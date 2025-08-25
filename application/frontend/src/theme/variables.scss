@@ -3,21 +3,22 @@
 
 /** Custom HDNS Theme Variables - Hetzner Brand Colors **/
 :root {
-  // Primary brand colors - Hetzner Red
-  --ion-color-primary: #d50c2d;
-  --ion-color-primary-rgb: 213, 12, 45;
+  // Primary brand colors - Hetzner Yellow/Orange
+  --ion-color-primary: #ff6600;
+  --ion-color-primary-rgb: 255, 102, 0;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #bb0a28;
-  --ion-color-primary-tint: #d92442;
+  --ion-color-primary-shade: #e05a00;
+  --ion-color-primary-tint: #ff751a;
 
-  // Secondary brand colors - Hetzner Yellow/Orange
-  --ion-color-secondary: #ff6600;
-  --ion-color-secondary-rgb: 255, 102, 0;
+  // Secondary brand colors - Hetzner Red
+  --ion-color-secondary: #d50c2d;
+  --ion-color-secondary-rgb: 213, 12, 45;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #e05a00;
-  --ion-color-secondary-tint: #ff751a;
+  --ion-color-secondary-shade: #bb0a28;
+  --ion-color-secondary-tint: #d92442;
+
 
   // Success color - Keeping green for DNS active status
   --ion-color-success: #2dd36f;
@@ -66,8 +67,8 @@
   --ion-color-dns-pending-tint: #ff751a;
 
   // Background gradients using Hetzner colors
-  --hdns-gradient-primary: linear-gradient(90deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 90%, black 100%);
-  --hdns-gradient-secondary: linear-gradient(90deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+  --hdns-gradient-primary: linear-gradient(90deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 90%, black 100%);
+  --hdns-gradient-secondary: linear-gradient(90deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 100%);
   --hdns-gradient-success: linear-gradient(90deg, var(--ion-color-dns-active) 0%, var(--ion-color-success) 100%);
   --hdns-gradient-warning: linear-gradient(90deg, var(--ion-color-warning) 0%, var(--ion-color-dns-pending) 100%);
   --hdns-gradient-danger: linear-gradient(90deg, var(--ion-color-danger) 0%, var(--ion-color-dns-inactive) 100%);

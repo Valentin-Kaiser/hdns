@@ -249,7 +249,7 @@ ion-content {
     z-index: 101; // Above the backdrop-blur (z-index: 100)
 
     // Default form card styling (DNS record, config, logs)
-    border: 1px solid var(--ion-color-primary);
+    // border: 1px solid var(--ion-color-primary);
 
     // Add record variant
     &.add-record {

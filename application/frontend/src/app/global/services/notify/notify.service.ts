@@ -110,7 +110,7 @@ export class NotifyService {
 	 * @returns
 	 * @memberof NotifyService
 	 */
-	async presentToast(msg: string, title?: string, duration: number = 5000) {
+	async presentToast(title: string, msg?: string, duration: number = 5000) {
 		this.toast = await this.toastController.create({
 			header: title,
 			message: msg,
@@ -136,8 +136,11 @@ export class NotifyService {
 	 * @returns
 	 * @memberof NotifyService
 	 */
-	async presentErrorToast(msg: string, title?: string, duration: number = 5000) {
-		let err = this.extractErrorMessage(msg);
+	async presentErrorToast(title: string, msg?: string, duration: number = 5000) {
+		let err = "";
+		if (msg) {
+			err = this.extractErrorMessage(msg);
+		}
 		this.errortoast = await this.toastController.create({
 			header: title,
 			message: err,
