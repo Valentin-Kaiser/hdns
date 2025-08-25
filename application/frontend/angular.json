@@ -19,7 +19,7 @@
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": {
-              "base": "../backend/pkg/web/static",
+              "base": "../backend/pkg/service/static",
               "browser": ""
             },
             "index": "src/index.html",
