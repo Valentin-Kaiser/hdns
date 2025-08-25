@@ -1,17 +1,18 @@
 <ion-header>
   <ion-toolbar>
+    <ion-img src="/assets/hdns-icon.png" slot="start" class="header-logo"></ion-img>
     <ion-title size="large">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <ion-icon name="dns-outline"></ion-icon>
         Hetzner Dynamic DNS
         @if (current?.ip) {
-        <ion-chip color="light" outline>
-          <ion-icon name="globe-outline"></ion-icon>
-          <ion-label>{{ current.ip }}</ion-label>
-        </ion-chip>
+
         }
       </div>
     </ion-title>
+    <ion-chip color="light" slot="end" outline class="address-chip">
+      <ion-icon name="globe-outline"></ion-icon>
+      <ion-label>{{ current.ip }}</ion-label>
+    </ion-chip>
     <ion-buttons slot="end">
       <ion-button fill="clear" (click)="toggleLogs()" title="View Logs" [color]="showLogs ? 'primary' : ''"
         [disabled]="record">
@@ -29,6 +30,11 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- Background Blur Backdrop -->
+  @if (record || showConfig || showLogs) {
+  <div class="backdrop-blur" (click)="closeActiveForm()"></div>
+  }
+
   <ion-grid class="ion-no-padding ion-no-margin">
 
     @if ((!records || records.length === 0 ) && !record) {
@@ -57,7 +63,7 @@
       <ion-col size="12" size-md="6" size-lg="4">
         <ion-card class="record-card">
           <div class="record-actions-bar">
-            <ion-button size="small" fill="clear" color="primary" (click)="refreshRecord(r)" title="Refresh Record"
+            <ion-button size="small" fill="clear" color="medium" (click)="refreshRecord(r)" title="Refresh Record"
               [disabled]="showLogs || showConfig || record" class="action-btn">
               <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
             </ion-button>

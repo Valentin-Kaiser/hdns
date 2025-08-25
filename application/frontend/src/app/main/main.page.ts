@@ -23,7 +23,7 @@ export class MainPage implements OnInit, OnDestroy {
   isLoading = true;
   isRefreshing = false;
   tokenError = false;
-  
+
   // Configuration and logs states
   showConfig = false;
   showLogs = false;
@@ -31,13 +31,13 @@ export class MainPage implements OnInit, OnDestroy {
   originalConfig: Config | null = null;
   isLoadingConfig = false;
   isSavingConfig = false;
-  
+
   logs = '';
   isLoadingLogs = false;
   isRefreshingLogs = false;
-  
+
   private autoRefreshSubscription?: Subscription;
-  
+
   formSteps = {
     token: false,
     zoneId: false,
@@ -64,7 +64,7 @@ export class MainPage implements OnInit, OnDestroy {
 
   private loadInitialData() {
     this.isLoading = true;
-    
+
     // Load current address and records in parallel
     Promise.all([
       this.apiService.address().toPromise(),
@@ -102,9 +102,9 @@ export class MainPage implements OnInit, OnDestroy {
 
   refresh() {
     if (this.isRefreshing) return;
-    
+
     this.isRefreshing = true;
-    
+
     Promise.all([
       this.apiService.refreshAddress().toPromise(),
       this.apiService.records().toPromise()
@@ -153,7 +153,7 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   addRecord() {
-    this.record = {type: "A", ttl: 300} as Record;
+    this.record = { type: "A", ttl: 300 } as Record;
     this.zones = [];
     this.resetFormSteps();
   }
@@ -173,6 +173,16 @@ export class MainPage implements OnInit, OnDestroy {
     this.tokenError = false;
     this.zones = [];
     this.resetFormSteps();
+  }
+
+  closeActiveForm() {
+    if (this.record) {
+      this.cancel();
+    } else if (this.showConfig) {
+      this.toggleConfig();
+    } else if (this.showLogs) {
+      this.toggleLogs();
+    }
   }
 
   private resetFormSteps() {
@@ -237,7 +247,7 @@ export class MainPage implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Create record error:', error);
         this.notifyService.presentErrorToast(
-          error.error?.message || 'Failed to create DNS record', 
+          error.error?.message || 'Failed to create DNS record',
           'Creation Error'
         );
       },
@@ -269,7 +279,7 @@ export class MainPage implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Update record error:', error);
         this.notifyService.presentErrorToast(
-          error.error?.message || 'Failed to update DNS record', 
+          error.error?.message || 'Failed to update DNS record',
           'Update Error'
         );
       },
@@ -291,7 +301,7 @@ export class MainPage implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Refresh record error:', error);
         this.notifyService.presentErrorToast(
-          `Failed to refresh record ${record.name}.${record.domain}`, 
+          `Failed to refresh record ${record.name}.${record.domain}`,
           'Refresh Error'
         );
       }
@@ -299,23 +309,30 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   deleteRecord(record: Record) {
-    if (!confirm(`Are you sure you want to delete the record ${record.name}.${record.domain}?`)) {
-      return;
-    }
-
-    this.apiService.deleteRecord(record).subscribe({
-      next: () => {
-        this.records = this.records.filter(r => r.id !== record.id);
-        this.notifyService.presentToast(`Record ${record.name}.${record.domain} deleted`, 'Success');
+    this.notifyService.showWarning(
+      this,
+      `Are you sure you want to delete the record ${record.name}.${record.domain}?`,
+      () => { },
+      () => {
+        this.apiService.deleteRecord(record).subscribe({
+          next: () => {
+            this.records = this.records.filter(r => r.id !== record.id);
+            this.notifyService.presentToast(`Record ${record.name}.${record.domain} deleted`, 'Success');
+          },
+          error: (error) => {
+            console.error('Delete record error:', error);
+            this.notifyService.presentErrorToast(
+              `Failed to delete record ${record.name}.${record.domain}`,
+              'Delete Error'
+            );
+          }
+        });
       },
-      error: (error) => {
-        console.error('Delete record error:', error);
-        this.notifyService.presentErrorToast(
-          `Failed to delete record ${record.name}.${record.domain}`, 
-          'Delete Error'
-        );
-      }
-    });
+      "Cancel",
+      "Delete",
+      "medium",
+      "danger",
+    )
   }
 
   isRecordUpdated(record: Record): boolean {
