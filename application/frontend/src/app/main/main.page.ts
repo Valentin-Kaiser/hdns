@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Subscription, timer } from 'rxjs';
 import { ApiService } from '../global/services/api/api.service';
-import { Address, Record, RecordType, Zone } from '../global/services/api/model/object';
+import { Address, Zone as DnsZone, Record, RecordType } from '../global/services/api/model/object';
 import { NotifyService } from '../global/services/notify/notify.service';
 
 @Component({
@@ -19,17 +19,30 @@ export class MainPage implements OnInit, OnDestroy {
   current: Address | null = null;
   records: Record[] = [];
   newRecord: Partial<Record> | null = null;
-  zones: any[] = [];
+  editRecord: Record | null = null;
+  zones: DnsZone[] = [];
   isLoading = true;
   isRefreshing = false;
   isCreatingRecord = false;
+  isUpdatingRecord = false;
   showAddForm = false;
+  showEditForm = false;
+  tokenError = false;
   
   // Auto-refresh subscription
   private autoRefreshSubscription?: Subscription;
   
   // Form step validation
   formSteps = {
+    token: false,
+    zoneId: false,
+    type: false,
+    name: false,
+    ttl: false
+  };
+
+  // Edit form steps
+  editFormSteps = {
     token: false,
     zoneId: false,
     type: false,
@@ -124,13 +137,23 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   loadZones() {
+    if (!this.newRecord?.token) return;
+    
+    this.tokenError = false;
     this.apiService.zones(this.newRecord.token).subscribe({
       next: (response) => {
         this.zones = response || [];
+        this.tokenError = false;
+        if (this.zones.length === 0) {
+          this.notifyService.presentErrorToast('No zones found for this API token', 'Token Validation');
+          this.tokenError = true;
+        }
       },
       error: (error) => {
         console.error('Error loading zones:', error);
-        this.notifyService.presentErrorToast('Failed to load zones', 'Error');
+        this.tokenError = true;
+        this.zones = [];
+        this.notifyService.presentErrorToast('Invalid API token or failed to load zones', 'Token Validation Error');
       }
     });
   }
@@ -155,11 +178,40 @@ export class MainPage implements OnInit, OnDestroy {
   cancelAddRecord() {
     this.showAddForm = false;
     this.newRecord = null;
+    this.tokenError = false;
+    this.zones = [];
     this.resetFormSteps();
+  }
+
+  editRecordAction(record: Record) {
+    this.showEditForm = true;
+    this.editRecord = { ...record }; // Create a copy to avoid modifying the original
+    this.zones = []; // Reset zones, will be loaded when token is validated
+    this.tokenError = false;
+    this.resetEditFormSteps();
+    this.validateEditFormSteps();
+  }
+
+  cancelEditRecord() {
+    this.showEditForm = false;
+    this.editRecord = null;
+    this.tokenError = false;
+    this.zones = [];
+    this.resetEditFormSteps();
   }
 
   private resetFormSteps() {
     this.formSteps = {
+      token: false,
+      zoneId: false,
+      type: false,
+      name: false,
+      ttl: false
+    };
+  }
+
+  private resetEditFormSteps() {
+    this.editFormSteps = {
       token: false,
       zoneId: false,
       type: false,
@@ -178,6 +230,16 @@ export class MainPage implements OnInit, OnDestroy {
     this.formSteps.ttl = !!(this.newRecord.ttl && this.newRecord.ttl > 0);
   }
 
+  private validateEditFormSteps() {
+    if (!this.editRecord) return;
+    
+    this.editFormSteps.token = !!(this.editRecord.token && this.editRecord.token.trim().length > 0);
+    this.editFormSteps.zoneId = !!(this.editRecord.zone_id && this.editRecord.zone_id.trim().length > 0);
+    this.editFormSteps.type = !!(this.editRecord.type);
+    this.editFormSteps.name = !!(this.editRecord.name && this.editRecord.name.trim().length > 0);
+    this.editFormSteps.ttl = !!(this.editRecord.ttl && this.editRecord.ttl > 0);
+  }
+
   onFormFieldChange() {
     console.log('Form field changed:', this.newRecord);
     this.validateFormSteps();
@@ -186,15 +248,57 @@ export class MainPage implements OnInit, OnDestroy {
     }
   }
 
+  onEditFormFieldChange() {
+    console.log('Edit form field changed:', this.editRecord);
+    this.validateEditFormSteps();
+    if (this.editFormSteps.token && !this.editFormSteps.zoneId) {
+      this.loadZonesForEdit();
+    }
+  }
+
+  loadZonesForEdit() {
+    if (!this.editRecord?.token) return;
+    
+    this.tokenError = false;
+    this.apiService.zones(this.editRecord.token).subscribe({
+      next: (response) => {
+        this.zones = response || [];
+        this.tokenError = false;
+        if (this.zones.length === 0) {
+          this.notifyService.presentErrorToast('No zones found for this API token', 'Token Validation');
+          this.tokenError = true;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading zones:', error);
+        this.tokenError = true;
+        this.zones = [];
+        this.notifyService.presentErrorToast('Invalid API token or failed to load zones', 'Token Validation Error');
+      }
+    });
+  }
+
   isFormValid(): boolean {
     return Object.values(this.formSteps).every(step => step);
   }
 
-  setZone(zone: Zone) {
+  isEditFormValid(): boolean {
+    return Object.values(this.editFormSteps).every(step => step);
+  }
+
+  setZone(zone: DnsZone) {
     if (this.newRecord) {
       this.newRecord.zone_id = zone.id;
       this.newRecord.domain = zone.name;
       this.validateFormSteps();
+    }
+  }
+
+  setEditZone(zone: DnsZone) {
+    if (this.editRecord) {
+      this.editRecord.zone_id = zone.id;
+      this.editRecord.domain = zone.name;
+      this.validateEditFormSteps();
     }
   }
 
@@ -223,6 +327,38 @@ export class MainPage implements OnInit, OnDestroy {
       },
       complete: () => {
         this.isCreatingRecord = false;
+      }
+    });
+  }
+
+  updateRecord() {
+    if (!this.editRecord || !this.isEditFormValid()) {
+      this.notifyService.presentErrorToast('Please fill in all required fields', 'Validation Error');
+      return;
+    }
+
+    this.isUpdatingRecord = true;
+
+    this.apiService.updateRecord(this.editRecord).subscribe({
+      next: (response) => {
+        if (response) {
+          const index = this.records.findIndex(r => r.id === this.editRecord!.id);
+          if (index !== -1) {
+            this.records[index] = response;
+          }
+          this.notifyService.presentToast('DNS record updated successfully', 'Success');
+          this.cancelEditRecord();
+        }
+      },
+      error: (error) => {
+        console.error('Update record error:', error);
+        this.notifyService.presentErrorToast(
+          error.error?.message || 'Failed to update DNS record', 
+          'Update Error'
+        );
+      },
+      complete: () => {
+        this.isUpdatingRecord = false;
       }
     });
   }

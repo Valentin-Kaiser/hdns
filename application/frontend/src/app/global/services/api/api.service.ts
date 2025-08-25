@@ -5,7 +5,7 @@ import { catchError, Observable, tap } from "rxjs";
 import { environment } from "src/environments/environment";
 import { LoggerService } from "../logger/logger.service";
 import { NotifyService } from "../notify/notify.service";
-import { Address, Record } from "./model/object";
+import { Address, Zone as DnsZone, Record } from "./model/object";
 
 @Injectable({
     providedIn: 'root',
@@ -54,7 +54,7 @@ export class ApiService {
         return this.get("object/record");
     }
 
-    public zones(token: string): Observable<Zone[]> {
+    public zones(token: string): Observable<DnsZone[]> {
         return this.get(`object/zone/${token}`);
     }
 
