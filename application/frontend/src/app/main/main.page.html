@@ -1,0 +1,85 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title size="large">{{ current?.ip}}</ion-title>
+    <ion-button slot="end" fill="clear" (click)="refresh()">
+      <ion-icon name="refresh-outline"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-grid class="ion-no-padding ion-no-margin">
+    <ion-row *ngIf="!records || records.length === 0" class="ion-text-center">
+      <ion-label class="ion-padding">
+        No DNS records found.
+      </ion-label>
+    </ion-row>
+    <ion-row>
+      <ion-col size="3" *ngFor="let record of records">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title [color]="record.address_id == current?.id ? 'primary' : 'warning'">
+              {{ record.name }}.{{ record.domain }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-card-subtitle>Last updated: {{ record.updated_at | date: 'short' }}</ion-card-subtitle>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="3">
+        <ion-card (click)="addRecord()" button>
+          <ion-card-header>
+            <ion-card-title>Add New Record</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Click here to add a new DNS record.
+          </ion-card-content>
+        </ion-card>
+
+        @if (newRecord) {
+        <ion-card>
+          <ion-item>
+            <ion-input type="text" placeholder="Hetzner Token" label="Please enter your Hetzner token" labelPlacement="stacked"
+              [(ngModel)]="newRecord.token"></ion-input>
+          </ion-item>
+          @if (newRecord.token) {
+          <ion-item>
+            <ion-input type="text" placeholder="Zone ID" [(ngModel)]="newRecord.zone_id"></ion-input>
+          </ion-item>
+          }
+          @if (newRecord.zone_id) {
+          <ion-item>
+            <ion-select placeholder="Type" [(ngModel)]="newRecord.type">
+              <ion-select-option value="A">A</ion-select-option>
+              <ion-select-option value="AAAA">AAAA</ion-select-option>
+              <ion-select-option value="CNAME">CNAME</ion-select-option>
+              <ion-select-option value="MX">MX</ion-select-option>
+              <ion-select-option value="TXT">TXT</ion-select-option>
+              <ion-select-option value="NS">NS</ion-select-option>
+            </ion-select>
+          </ion-item>
+          }
+          @if (newRecord.type) {
+          <ion-item>
+            <ion-input type="text" placeholder="Name" [(ngModel)]="newRecord.name"></ion-input>
+          </ion-item>
+          }
+          @if (newRecord.name) {
+          <ion-item>
+            <ion-input type="text" placeholder="Domain" [(ngModel)]="newRecord.domain"></ion-input>
+          </ion-item>
+          }
+          @if (newRecord.domain) {
+          <ion-item>
+            <ion-input type="text" placeholder="TTL" [(ngModel)]="newRecord.ttl"></ion-input>
+          </ion-item>
+          }
+          @if (newRecord.ttl) {
+            <ion-button expand="full" (click)="createRecord()">Create Record</ion-button>
+          }
+        </ion-card>
+        }
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,7 @@
+{
+  "name": "mailmento",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

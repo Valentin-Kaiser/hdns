@@ -1,0 +1,48 @@
+<ion-grid>
+  <ion-row>
+    <ion-col>
+      <ion-label color="danger">
+        <h1>{{error.message}}</h1>
+      </ion-label>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <ion-label>
+        <p *ngFor="let trace of error.trace">{{trace}}</p>
+      </ion-label>
+    </ion-col>
+  </ion-row>
+  <ion-row *ngIf="error.details">
+    <ion-col>
+      <ion-grid class="ion-no-padding ion-no-margin">
+        <ion-row>
+          <ion-col>
+            <ion-label color="danger">
+              <h2>{{error.details.message}}</h2>
+            </ion-label>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-label>
+              <p *ngFor="let trace of error.details.trace">{{trace}}</p>
+            </ion-label>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-justify-content-end">
+    <ion-col size="auto">
+      <ion-button (click)="copy()" color="medium" size="small" fill="clear">
+        <ion-icon name="copy"></ion-icon>
+      </ion-button>
+    </ion-col>
+    <ion-col size="auto">
+      <ion-button (click)="dismiss()" size="small" fill="clear">
+        OK
+      </ion-button>
+    </ion-col>
+  </ion-row>
+</ion-grid>

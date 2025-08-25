@@ -1,0 +1,21 @@
+<ion-grid class="ion-padding">
+  <ion-row>
+    <ion-col class="ion-margin">
+      <ion-label>
+        <h2 [innerHTML]="safeMessage"></h2>
+      </ion-label>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-justify-content-end">
+    <ion-col size="auto" *ngIf="leftButtonLabel">
+      <ion-button (click)="doOnLeft()" [color]="leftButtonColor" size="small" fill="clear">
+        {{ leftButtonLabel }}
+      </ion-button>
+    </ion-col>
+    <ion-col size="auto" *ngIf="rightButtonLabel">
+      <ion-button (click)="doOnRight()" [color]="rightButtonColor" size="small" fill="clear">
+        {{ rightButtonLabel }}
+      </ion-button>
+    </ion-col>
+  </ion-row>
+</ion-grid>
