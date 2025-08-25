@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"os"
+	"slices"
+	"strings"
 
 	"github.com/Valentin-Kaiser/go-core/apperror"
 	"github.com/Valentin-Kaiser/go-core/zlog"
@@ -61,5 +63,7 @@ func GetLog(c *Context) (interface{}, error) {
 	if err != nil {
 		return nil, apperror.NewError("failed to read log file").AddError(err)
 	}
-	return string(content), nil
+	lines := strings.Split(string(content), "\n")
+	slices.Reverse(lines)
+	return strings.Join(lines, "\n"), nil
 }
