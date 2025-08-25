@@ -244,13 +244,14 @@ export class NotifyService {
 		rightButtonLabel?: string,
 		leftButtonColor?: string,
 		rightButtonColor?: string,
+		hint?: string,
 		param?: any
 	) {
 		const modal = await this.modalController.create({
 			component: WarningComponent,
 			backdropDismiss: true,
 			showBackdrop: true,
-			cssClass: "auto-height warning-auto-height",
+			cssClass: "auto-height",
 			componentProps: {
 				reference,
 				message,
@@ -260,6 +261,7 @@ export class NotifyService {
 				rightButtonLabel,
 				leftButtonColor,
 				rightButtonColor,
+				hint,
 				param,
 			},
 		});

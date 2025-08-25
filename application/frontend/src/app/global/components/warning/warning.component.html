@@ -1,35 +1,31 @@
 <div class="warning-modal-content">
-  <ion-header class="warning-header">
-    <ion-toolbar color="warning">
-      <ion-title>
-        <ion-icon name="warning-outline" class="header-icon"></ion-icon>
-        Confirmation Required
-      </ion-title>
-    </ion-toolbar>
-  </ion-header>
-
   <ion-content class="warning-content">
     <div class="warning-message">
       <ion-icon name="help-circle-outline" class="message-icon"></ion-icon>
       <div class="message-text" [innerHTML]="safeMessage"></div>
     </div>
+
   </ion-content>
 
   <ion-footer class="warning-footer">
     <ion-toolbar>
+      @if (hint) {
+      <ion-label slot="start" class="hint"><small [innerHTML]="safeHint"></small></ion-label>
+    }
       <ion-buttons slot="end">
         @if (leftButtonLabel) {
           <ion-button 
             (click)="doOnLeft()" 
-            [color]="leftButtonColor || 'medium'"
-            fill="outline">
+            [color]="leftButtonColor"
+            expand="block">
             {{ leftButtonLabel }}
           </ion-button>
         }
         @if (rightButtonLabel) {
           <ion-button 
             (click)="doOnRight()" 
-            [color]="rightButtonColor || 'primary'">
+            [color]="rightButtonColor"
+            expand="block">
             {{ rightButtonLabel }}
           </ion-button>
         }

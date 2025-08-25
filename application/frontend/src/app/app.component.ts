@@ -4,6 +4,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import * as IonIcons from 'ionicons/icons';
 import { ApiService } from './global/services/api/api.service';
+import { ConnectionService } from './global/services/connection/connection.service';
 import { LoggerService } from './global/services/logger/logger.service';
 import { NotifyService } from './global/services/notify/notify.service';
 
@@ -17,6 +18,7 @@ import { NotifyService } from './global/services/notify/notify.service';
   providers: [
     ApiService,
     NotifyService,
+    ConnectionService,
     ModalController,
   ],
 })
@@ -26,8 +28,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     private logger: LoggerService,
-    private notifyService: NotifyService,
-    private apiService: ApiService,
+    private connectionService: ConnectionService
   ) {
     addIcons(IonIcons);
     this.logger.info(`${this.logType} ${this.logName} constructor`);
@@ -35,19 +36,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.logger.info(`${this.logType} ${this.logName} ngOnInit`);
-    this.apiService.info().subscribe({
-      next: (response) => {
-        this.logger.info(`${this.logType} ${this.logName} API info response:`, response);
-        if (response) {
-          this.notifyService.presentToast("API is running");
-          return;
-        }
-        this.notifyService.presentErrorToast("API is not running");
-      },
-      error: (error) => {
-        this.logger.error(`${this.logType} ${this.logName} API info error:`, error);
-        this.notifyService.presentErrorToast("API is not running");
-      }
-    })
+    this.connectionService.init();
   }
 }
