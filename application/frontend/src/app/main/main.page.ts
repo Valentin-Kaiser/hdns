@@ -42,8 +42,7 @@ export class MainPage implements OnInit, OnDestroy {
     token: false,
     zoneId: false,
     type: false,
-    name: false,
-    ttl: false
+    name: false
   };
 
   constructor(
@@ -165,7 +164,7 @@ export class MainPage implements OnInit, OnDestroy {
     this.tokenError = false;
     this.loadZones();
     this.resetFormSteps();
-    this.formSteps = { ...this.formSteps, token: true, zoneId: true, type: true, name: true, ttl: true };
+    this.formSteps = { ...this.formSteps, token: true, zoneId: true, type: true, name: true };
     this.validateFormSteps();
   }
 
@@ -192,7 +191,6 @@ export class MainPage implements OnInit, OnDestroy {
       zoneId: false,
       type: false,
       name: false,
-      ttl: false
     };
   }
 
@@ -202,7 +200,6 @@ export class MainPage implements OnInit, OnDestroy {
     this.formSteps.zoneId = !!(this.record.zone_id && this.record.zone_id.trim().length > 0);
     this.formSteps.type = !!(this.record.type);
     this.formSteps.name = !!(this.record.name && this.record.name.trim().length > 0);
-    this.formSteps.ttl = !!(this.record.ttl && this.record.ttl > 0);
   }
 
   onFormFieldChange() {

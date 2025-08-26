@@ -124,12 +124,12 @@
             </div>
             }
 
-            <!-- Step 5: TTL -->
+            <!-- Step 5: TTL (optional) -->
             @if (formSteps.name) {
             <div class="form-step">
               <div class="step-label">
                 <span class="step-number">5</span>
-                TTL (Time To Live)
+                TTL - Time To Live (optional)
               </div>
               <ion-item>
                 <ion-input type="number" placeholder="Enter TTL in seconds" [(ngModel)]="record.ttl"
@@ -140,7 +140,7 @@
             }
 
             <!-- Create Button -->
-            @if (formSteps.ttl) {
+            @if (formSteps.name) {
             <ion-button class="create-button" expand="block" (click)="record.id ? updateRecord() : createRecord()" [disabled]="!isFormValid()">
               @if (isLoading) {
               <ion-spinner name="crescent" slot="start"></ion-spinner>
