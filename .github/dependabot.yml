@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/application/backend"
+    schedule:
+      interval: "daily"
+    groups:
+      gomod:
+        dependency-type: "production"
+      gomod-dev:
+        dependency-type: "development"
+    assignees:
+      - "Valentin-Kaiser"
+  - package-ecosystem: "npm"
+    directory: "/application/frontend"
+    schedule:
+      interval: "daily"
+    groups:
+      npm:
+        dependency-type: "production"
+      npm-dev:
+        dependency-type: "development"
+    assignees:
+      - "Valentin-Kaiser"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "Valentin-Kaiser"
