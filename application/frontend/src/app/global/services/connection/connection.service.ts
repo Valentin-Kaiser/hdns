@@ -16,7 +16,7 @@ export class ConnectionService implements OnDestroy {
 
 	modal: HTMLIonModalElement;
 
-	interval: number = 30000;
+	interval: number = 3000;
 	intervalID;
 	refreshIntervalID;
 
@@ -52,7 +52,7 @@ export class ConnectionService implements OnDestroy {
 		this.presentModal();
 		setTimeout(() => {
 			this.checkApiAvailability();
-		}, 1000);
+		}, 300);
 		this.intervalID = setInterval(this.checkApiAvailability.bind(this), this.interval);
 	}
 
@@ -86,7 +86,7 @@ export class ConnectionService implements OnDestroy {
 					if (this.connected.value) {
 						this.dismissModal();
 					}
-				}, 2000);
+				}, 400);
 				this.interval = this.connected.value ? 30000 : 5000;
 				clearInterval(this.intervalID);
 				this.intervalID = setInterval(this.checkApiAvailability.bind(this), this.interval);
