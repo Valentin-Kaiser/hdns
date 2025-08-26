@@ -61,7 +61,7 @@ func RefreshRecord(c *Context) (interface{}, error) {
 	if err != nil {
 		return nil, apperror.Wrap(err)
 	}
-	log.Info().Msgf("DNS record %s refreshed successfully", record.Name)
+	log.Info().Msgf("DNS record %s.%s refreshed successfully", record.Name, record.Domain)
 	return record, nil
 }
 

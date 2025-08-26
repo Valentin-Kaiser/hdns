@@ -45,7 +45,7 @@ func UpdateRecord(r *model.Record, addr *model.Address) error {
 	if err != nil {
 		return apperror.Wrap(err)
 	}
-	log.Info().Msgf("DNS record %s updated successfully", r.Name)
+	log.Info().Msgf("DNS record %s.%s updated successfully", r.Name, r.Domain)
 
 	r.AddressID = &addr.ID
 	r.Address = addr
@@ -53,7 +53,7 @@ func UpdateRecord(r *model.Record, addr *model.Address) error {
 		return db.Save(&r).Error
 	})
 	if err != nil {
-		return apperror.NewErrorf("failed to update DNS record %s in database", r.Name).AddError(err)
+		return apperror.NewErrorf("failed to update DNS record %s.%s in database", r.Name, r.Domain).AddError(err)
 	}
 
 	return nil

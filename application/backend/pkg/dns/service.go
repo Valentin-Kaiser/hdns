@@ -49,16 +49,15 @@ func Refresh() {
 	for _, record := range records {
 		address, ok, err := Lookup(record)
 		if err != nil {
-			log.Error().Err(err).Msgf("failed to lookup DNS record %s", record.Name)
-			continue
+			log.Warn().Err(err).Msgf("failed to lookup DNS record %s.%s", record.Name, record.Domain)
 		}
 		if ok {
-			log.Info().Msgf("DNS record %s is already up-to-date with address %s", record.Name, address.IP)
+			log.Info().Msgf("DNS record %s.%s is already up-to-date with address %s", record.Name, record.Domain, address.IP)
 			continue
 		}
 		err = UpdateRecord(record, addr)
 		if err != nil {
-			log.Error().Err(err).Msgf("failed to update DNS record %s", record.Name)
+			log.Error().Err(err).Msgf("failed to update DNS record %s.%s", record.Name, record.Domain)
 			continue
 		}
 	}
