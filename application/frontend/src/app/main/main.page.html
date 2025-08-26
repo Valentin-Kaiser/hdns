@@ -147,7 +147,7 @@
 
             <!-- Create Button -->
             @if (formSteps.ttl) {
-            <ion-button class="create-button" expand="block" (click)="createRecord()" [disabled]="!isFormValid()">
+            <ion-button class="create-button" expand="block" (click)="record.id ? updateRecord() : createRecord()" [disabled]="!isFormValid()">
               @if (isLoading) {
               <ion-spinner name="crescent" slot="start"></ion-spinner>
               Saving Record...
