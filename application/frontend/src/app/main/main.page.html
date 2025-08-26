@@ -1,12 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-img src="/assets/hdns-icon.png" slot="start" class="header-logo"></ion-img>
-    <ion-title size="large">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        Hetzner Dynamic DNS
-
-      </div>
-    </ion-title>
+    <ion-img src="/assets/hdns.png" slot="start" class="header-logo"></ion-img>
     @if (current?.ip) {
     <ion-chip color="light" slot="end" outline class="address-chip">
       <ion-icon name="globe-outline"></ion-icon>
@@ -369,7 +363,7 @@
       </ion-col>
       }
 
-      <ion-col size="12" size-md="6" size-lg="4" size-xl="3" class="ion-hide-sm-down">
+      <ion-col size="12" size-md="6" size-lg="4" size-xl="3" class="ion-hide-md-down">
         @if (!record) {
         <ion-card class="form-card add-record" (click)="addRecord()" button *ngIf="!showLogs && !showConfig">
           <div class="add-content">

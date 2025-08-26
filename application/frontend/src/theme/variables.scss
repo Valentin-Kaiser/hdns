@@ -1,9 +1,7 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
 
-/** Custom HDNS Theme Variables - Hetzner Brand Colors **/
 :root {
-  // Primary brand colors - Hetzner Yellow/Orange
   --ion-color-primary: #ff6600;
   --ion-color-primary-rgb: 255, 102, 0;
   --ion-color-primary-contrast: #ffffff;
@@ -11,16 +9,13 @@
   --ion-color-primary-shade: #e05a00;
   --ion-color-primary-tint: #ff751a;
 
-  // Secondary brand colors - Hetzner Red
-  --ion-color-secondary: #d50c2d;
-  --ion-color-secondary-rgb: 213, 12, 45;
+  --ion-color-secondary: #a8001c;
+  --ion-color-secondary-rgb: 168, 0, 28;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
   --ion-color-secondary-shade: #bb0a28;
   --ion-color-secondary-tint: #d92442;
 
-
-  // Success color - Keeping green for DNS active status
   --ion-color-success: #2dd36f;
   --ion-color-success-rgb: 45, 211, 111;
   --ion-color-success-contrast: #ffffff;
@@ -28,7 +23,6 @@
   --ion-color-success-shade: #28ba62;
   --ion-color-success-tint: #42d77d;
 
-  // Warning color - Enhanced yellow/amber
   --ion-color-warning: #ffc107;
   --ion-color-warning-rgb: 255, 193, 7;
   --ion-color-warning-contrast: #000000;
@@ -36,7 +30,6 @@
   --ion-color-warning-shade: #e0aa06;
   --ion-color-warning-tint: #ffca20;
 
-  // Danger color - Enhanced red (similar to Hetzner red but darker for danger)
   --ion-color-danger: #dc3545;
   --ion-color-danger-rgb: 220, 53, 69;
   --ion-color-danger-contrast: #ffffff;
@@ -44,31 +37,9 @@
   --ion-color-danger-shade: #c2303d;
   --ion-color-danger-tint: #e04858;
 
-  // Custom DNS status colors using Hetzner theme
-  --ion-color-dns-active: #2dd36f;
-  --ion-color-dns-active-rgb: 45, 211, 111;
-  --ion-color-dns-active-contrast: #ffffff;
-  --ion-color-dns-active-contrast-rgb: 255, 255, 255;
-  --ion-color-dns-active-shade: #28ba62;
-  --ion-color-dns-active-tint: #42d77d;
-
-  --ion-color-dns-inactive: #d50c2d;
-  --ion-color-dns-inactive-rgb: 213, 12, 45;
-  --ion-color-dns-inactive-contrast: #ffffff;
-  --ion-color-dns-inactive-contrast-rgb: 255, 255, 255;
-  --ion-color-dns-inactive-shade: #bb0a28;
-  --ion-color-dns-inactive-tint: #d92442;
-
-  --ion-color-dns-pending: #ff6600;
-  --ion-color-dns-pending-rgb: 255, 102, 0;
-  --ion-color-dns-pending-contrast: #ffffff;
-  --ion-color-dns-pending-contrast-rgb: 255, 255, 255;
-  --ion-color-dns-pending-shade: #e05a00;
-  --ion-color-dns-pending-tint: #ff751a;
-
-  // Background gradients using Hetzner colors
-  --hdns-gradient-primary: linear-gradient(90deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 90%, black 100%);
-  --hdns-gradient-secondary: linear-gradient(90deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 100%);
+  --hdns-gradient-primary: linear-gradient(150deg, var(--ion-color-secondary) 40%, black 100%);
+  --hdns-gradient-secondary: linear-gradient(150deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 100%);
+  --hdns-gradient-reverse: linear-gradient(150deg, black 0%, var(--ion-color-secondary) 10%, var(--ion-color-primary) 100%);
   --hdns-gradient-success: linear-gradient(90deg, var(--ion-color-dns-active) 0%, var(--ion-color-success) 100%);
   --hdns-gradient-warning: linear-gradient(90deg, var(--ion-color-warning) 0%, var(--ion-color-dns-pending) 100%);
   --hdns-gradient-danger: linear-gradient(90deg, var(--ion-color-danger) 0%, var(--ion-color-dns-inactive) 100%);
