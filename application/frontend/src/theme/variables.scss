@@ -39,10 +39,6 @@
 
   --hdns-gradient-primary: linear-gradient(150deg, var(--ion-color-secondary) 40%, black 100%);
   --hdns-gradient-secondary: linear-gradient(150deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 100%);
-  --hdns-gradient-reverse: linear-gradient(150deg, black 0%, var(--ion-color-secondary) 10%, var(--ion-color-primary) 100%);
-  --hdns-gradient-success: linear-gradient(90deg, var(--ion-color-dns-active) 0%, var(--ion-color-success) 100%);
-  --hdns-gradient-warning: linear-gradient(90deg, var(--ion-color-warning) 0%, var(--ion-color-dns-pending) 100%);
-  --hdns-gradient-danger: linear-gradient(90deg, var(--ion-color-danger) 0%, var(--ion-color-dns-inactive) 100%);
   
   // Card styling
   --hdns-card-border-radius: 16px;
