@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/Valentin-Kaiser/go-core/apperror"
 	"github.com/Valentin-Kaiser/go-core/database"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
@@ -155,7 +156,7 @@ func (e *Endpoint) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Endpoint) HandleWebsocket(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) {
-	defer conn.Close()
+	defer apperror.Catch(conn.Close, "failed to close websocket connection")
 	handler, ok := e.handler["WS"]
 	if !ok {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Valentin-Kaiser/go-core/apperror"
 	"github.com/Valentin-Kaiser/go-core/interruption"
 	"github.com/Valentin-Kaiser/go-core/web"
 	"github.com/Valentin-Kaiser/hdns/pkg/config"
@@ -39,7 +40,7 @@ func Start() {
 		WithErrorLog().
 		WithFS([]string{"/"}, frontend).
 		WithWebsocket("/ws", func(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) {
-			defer conn.Close()
+			defer apperror.Catch(conn.Close, "failed to close websocket connection")
 		})
 
 	for _, code := range web.ErrorCodes {
@@ -113,7 +114,7 @@ func handleHTTPError(w http.ResponseWriter, r *http.Request) {
 </body>
 </html>`
 
-	_, err := rw.Write([]byte(fmt.Sprintf(temp, rw.Status(), http.StatusText(rw.Status()), rw.Status(), http.StatusText(rw.Status()))))
+	_, err := fmt.Fprintf(rw, temp, rw.Status(), http.StatusText(rw.Status()), rw.Status(), http.StatusText(rw.Status()))
 	if err != nil {
 		log.Error().Err(err).Msg("[Service] failed to write error response")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

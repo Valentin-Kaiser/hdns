@@ -174,7 +174,7 @@ func (c *client) fetch(method, url string, body []byte) ([]byte, error) {
 	if err != nil {
 		return nil, apperror.NewError("sending HTTP request failed").AddError(err)
 	}
-	defer resp.Body.Close()
+	defer apperror.Catch(resp.Body.Close, "failed to close response body")
 	if resp.StatusCode != http.StatusOK {
 		return nil, apperror.NewErrorf("HTTP request failed with status %d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}

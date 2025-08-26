@@ -67,7 +67,7 @@ func resolveIPAddress(url string) (string, error) {
 	if err != nil {
 		return "", apperror.NewErrorf("failed to get public IP from %s", url).AddError(err)
 	}
-	defer resp.Body.Close()
+	defer apperror.Catch(resp.Body.Close, "failed to close response body")
 	bytes, err := io.ReadAll(io.LimitReader(resp.Body, 15))
 	if err != nil {
 		return "", apperror.NewErrorf("failed to read response from %s", url).AddError(err)
