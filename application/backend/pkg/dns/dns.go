@@ -44,9 +44,18 @@ func Lookup(record *model.Record) (*model.Address, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	ips, err := resolver.LookupHost(ctx, fmt.Sprintf("%s.%s", record.Name, record.Domain))
+	domain := record.Domain
+	if record.Name == "*" {
+		domain = "wildcard." + record.Domain
+	}
+
+	if record.Name != "@" && record.Name != "*" {
+		domain = fmt.Sprintf("%s.%s", record.Name, record.Domain)
+	}
+
+	ips, err := resolver.LookupHost(ctx, domain)
 	if err != nil {
-		return nil, false, apperror.NewErrorf("failed to lookup DNS record %s.%s", record.Name, record.Domain).AddError(err)
+		return nil, false, apperror.NewErrorf("failed to lookup DNS record %s", domain).AddError(err)
 	}
 
 	var address *model.Address
