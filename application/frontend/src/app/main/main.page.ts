@@ -198,13 +198,11 @@ export class MainPage implements OnInit, OnDestroy {
 
   private validateFormSteps() {
     if (!this.record) return;
-    console.log(this.record)
     this.formSteps.token = !!(this.record.token && this.record.token.trim().length > 0);
     this.formSteps.zoneId = !!(this.record.zone_id && this.record.zone_id.trim().length > 0);
     this.formSteps.type = !!(this.record.type);
     this.formSteps.name = !!(this.record.name && this.record.name.trim().length > 0);
     this.formSteps.ttl = !!(this.record.ttl && this.record.ttl > 0);
-    console.log(this.formSteps);
   }
 
   onFormFieldChange() {
