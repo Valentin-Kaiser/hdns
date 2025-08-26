@@ -1,0 +1,28 @@
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* Full viewport height */
+    text-align: center;
+}
+
+.center-content>.content {
+    max-width: 100%;
+    width: 100%;
+    padding: 10px;
+}
+
+.cover {
+    height: 200px;
+    margin: 64px;
+}
+
+ion-spinner {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 64px;
+    width: 64px;
+}

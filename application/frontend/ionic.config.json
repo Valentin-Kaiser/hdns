@@ -1,0 +1,7 @@
+{
+  "name": "hdns",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

@@ -1,0 +1,6 @@
+package model
+
+type Address struct {
+	BaseModel
+	IP string `gorm:"not null" json:"ip"`
+}
