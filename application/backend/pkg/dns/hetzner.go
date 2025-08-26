@@ -81,7 +81,7 @@ func FetchZones(token string) ([]Zone, error) {
 
 func updateHetzner(r *model.Record, ip string) error {
 	c := &client{APIToken: r.Token.String()}
-	rec, found, err := c.findRecord(r.ZoneID, r.Name)
+	rec, found, err := c.findRecord(r)
 	if err != nil {
 		return apperror.Wrap(err)
 	}
@@ -140,12 +140,13 @@ func (c *client) createRecord(record *Record) error {
 	return c.handleAPIResponse(body, "create")
 }
 
-func (c *client) findRecord(zoneID, recordName string) (*Record, bool, error) {
-	url := fmt.Sprintf("%s?zone_id=%s&name=%s", hetznerBaseURL+"/records", zoneID, recordName)
+func (c *client) findRecord(r *model.Record) (*Record, bool, error) {
+	url := fmt.Sprintf("%s?zone_id=%s&name=%s&type=%s", hetznerBaseURL+"/records", r.ZoneID, r.Name, r.Type)
 	body, err := c.fetch(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, false, err
 	}
+	fmt.Printf("%s\n", body)
 	var res struct {
 		Records []Record `json:"records"`
 		Error   string   `json:"error"`
@@ -163,6 +164,7 @@ func (c *client) findRecord(zoneID, recordName string) (*Record, bool, error) {
 }
 
 func (c *client) fetch(method, url string, body []byte) ([]byte, error) {
+	log.Trace().Str("url", url).Str("method", method).Str("body", string(body)).Msg("HTTP request")
 	req, err := http.NewRequest(method, url, bytes.NewReader(body))
 	if err != nil {
 		return nil, apperror.NewError("creating HTTP request failed").AddError(err)
@@ -178,7 +180,12 @@ func (c *client) fetch(method, url string, body []byte) ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, apperror.NewErrorf("HTTP request failed with status %d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
-	return io.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, apperror.NewError("reading response body failed").AddError(err)
+	}
+	log.Trace().Str("body", string(body)).Msg("HTTP response")
+	return body, nil
 }
 
 func (c *client) validateRecord(r *Record) error {
