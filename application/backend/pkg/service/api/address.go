@@ -38,6 +38,31 @@ func init() {
 		EndpointTransportHTTP,
 		EndpointEncodingJSON,
 		[]string{
+			"/api/object/record/history",
+		}, map[string]Handler{
+			"GET":    GetRecordHistory,
+			"DELETE": DeleteRecordHistory,
+			"OPTIONS": func(context *Context) (interface{}, error) {
+				return nil, nil
+			},
+		})
+
+	RegisterEndpoint(
+		EndpointTransportHTTP,
+		EndpointEncodingJSON,
+		[]string{
+			"/api/object/record/{id}/history",
+		}, map[string]Handler{
+			"GET": GetRecordHistoryByID,
+			"OPTIONS": func(context *Context) (interface{}, error) {
+				return nil, nil
+			},
+		})
+
+	RegisterEndpoint(
+		EndpointTransportHTTP,
+		EndpointEncodingJSON,
+		[]string{
 			"/api/action/refresh/address",
 		}, map[string]Handler{
 			"GET": RefreshAddress,
@@ -102,4 +127,64 @@ func DeleteHistory(c *Context) (interface{}, error) {
 	}
 
 	return map[string]any{"deleted": len(addresses)}, nil
+}
+
+// GetRecordHistory retrieves the DNS record resolution history for all records
+func GetRecordHistory(c *Context) (interface{}, error) {
+	var history []model.RecordHistory
+	err := database.Execute(func(db *gorm.DB) error {
+		return db.Preload("Record").Preload("Address").
+			Order("resolved_at DESC").
+			Find(&history).Error
+	})
+	if err != nil {
+		return nil, apperror.NewError("failed to fetch record history").AddError(err)
+	}
+
+	return history, nil
+}
+
+// GetRecordHistoryByID retrieves the DNS record resolution history for a specific record
+func GetRecordHistoryByID(c *Context) (interface{}, error) {
+	recordID := c.req.PathValue("id")
+	if recordID == "" {
+		return nil, apperror.NewError("record ID is required")
+	}
+
+	var history []model.RecordHistory
+	err := database.Execute(func(db *gorm.DB) error {
+		return db.Preload("Record").Preload("Address").
+			Where("record_id = ?", recordID).
+			Order("resolved_at DESC").
+			Find(&history).Error
+	})
+	if err != nil {
+		return nil, apperror.NewError("failed to fetch record history").AddError(err)
+	}
+
+	return history, nil
+}
+
+// DeleteRecordHistory deletes DNS record resolution history
+func DeleteRecordHistory(c *Context) (interface{}, error) {
+	var history []model.RecordHistory
+	err := database.Execute(func(db *gorm.DB) error {
+		return db.Find(&history).Error
+	})
+	if err != nil {
+		return nil, apperror.NewError("failed to fetch record history").AddError(err)
+	}
+
+	if len(history) == 0 {
+		return nil, apperror.NewError("no record history to delete")
+	}
+
+	err = database.Execute(func(db *gorm.DB) error {
+		return db.Delete(&history).Error
+	})
+	if err != nil {
+		return nil, apperror.NewError("failed to delete record history").AddError(err)
+	}
+
+	return map[string]any{"deleted": len(history)}, nil
 }

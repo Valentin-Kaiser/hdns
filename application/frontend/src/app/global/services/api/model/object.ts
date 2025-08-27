@@ -20,6 +20,15 @@ export interface Record extends BaseModel {
     last_update: string; // ISO date string
 }
 
+export interface RecordHistory extends BaseModel {
+    record_id: number;
+    record?: Record;
+    address_id: number;
+    address?: Address;
+    resolved_ip: string;
+    resolved_at: string; // ISO date string
+}
+
 export interface Zone {
     id: string;
     name: string;

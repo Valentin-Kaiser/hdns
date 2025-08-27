@@ -46,6 +46,18 @@ export class ApiService {
         return this.delete("object/history");
     }
 
+    public recordHistory(): Observable<any[]> {
+        return this.get("object/record/history");
+    }
+
+    public recordHistoryByID(recordId: number): Observable<any[]> {
+        return this.get(`object/record/${recordId}/history`);
+    }
+
+    public clearRecordHistory(): Observable<any> {
+        return this.delete("object/record/history");
+    }
+
     public refreshRecord(id: number): Observable<Record> {
         return this.get(`action/refresh/record/${id}`);
     }
