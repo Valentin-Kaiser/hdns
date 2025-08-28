@@ -59,16 +59,13 @@ func UpdateRecord(r *model.Record, addr *model.Address) error {
 	return nil
 }
 
-func FetchRecord(r *model.Record) (*Record, error) {
+func FetchRecord(r *model.Record) (*Record, bool, error) {
 	c := &client{APIToken: r.Token.String()}
 	rec, found, err := c.findRecord(r)
 	if err != nil {
-		return nil, apperror.Wrap(err)
+		return nil, false, apperror.Wrap(err)
 	}
-	if !found {
-		return nil, apperror.NewError("record not found")
-	}
-	return rec, nil
+	return rec, found, nil
 }
 
 func FetchZones(token string) ([]Zone, error) {

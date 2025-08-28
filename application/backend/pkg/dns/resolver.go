@@ -18,7 +18,7 @@ type Resolution struct {
 	Server       string   `json:"server"`
 	Addresses    []string `json:"addresses"`
 	ResponseTime int64    `json:"response_time"`
-	Error        error    `json:"error"`
+	Error        string   `json:"error"`
 }
 
 // Resolver handles DNS resolution against multiple servers
@@ -70,10 +70,11 @@ func (r *Resolver) Resolve(domain string) ([]Resolution, error) {
 				Server:       dnsServer,
 				Addresses:    ips,
 				ResponseTime: responseTime.Milliseconds(),
-				Error:        err,
 			}
 
 			if err != nil {
+				results[index].Error = err.Error()
+
 				log.Warn().
 					Str("server", dnsServer).
 					Str("domain", domain).

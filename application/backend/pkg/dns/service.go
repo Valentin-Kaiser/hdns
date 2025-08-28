@@ -33,7 +33,7 @@ func Restart() {
 }
 
 func Refresh() {
-	current, err := UpdateAddress()
+	_, err := UpdateAddress()
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update public IP address")
 		return
@@ -47,20 +47,35 @@ func Refresh() {
 		return
 	}
 	for _, record := range records {
-		rec, err := FetchRecord(record)
+		err := RefreshRecord(record)
 		if err != nil {
-			log.Error().Err(err).Msgf("failed to fetch DNS record %s.%s", record.Name, record.Domain)
-			continue
-		}
-
-		if rec.Value == current.IP {
-			log.Info().Msgf("[DNS] record %s.%s is already up-to-date with address %s", record.Name, record.Domain, current.IP)
-			continue
-		}
-
-		err = UpdateRecord(record, current)
-		if err != nil {
-			log.Error().Err(err).Msgf("failed to update DNS record %s.%s", record.Name, record.Domain)
+			log.Error().Err(err).Msgf("failed to refresh DNS record %s.%s", record.Name, record.Domain)
 		}
 	}
+}
+
+func RefreshRecord(record *model.Record) error {
+	var current *model.Address
+	err := database.Execute(func(db *gorm.DB) error {
+		return db.Where("current = ?", true).First(&current).Error
+	})
+	if err != nil {
+		return err
+	}
+
+	rec, found, err := FetchRecord(record)
+	if err != nil {
+		return err
+	}
+
+	if found && rec.Value == current.IP {
+		log.Info().Msgf("[DNS] record %s.%s is already up-to-date with address %s", record.Name, record.Domain, current.IP)
+		return nil
+	}
+
+	err = UpdateRecord(record, current)
+	if err != nil {
+		return err
+	}
+	return nil
 }

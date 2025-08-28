@@ -140,6 +140,11 @@ func CreateRecord(c *Context) (interface{}, error) {
 		return nil, apperror.NewError("failed to create record").AddError(err)
 	}
 
+	err = dns.RefreshRecord(&record)
+	if err != nil {
+		return nil, apperror.Wrap(err)
+	}
+
 	return record, nil
 }
 
