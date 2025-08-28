@@ -1,7 +1,7 @@
 services:
   hetzner-dyndns:
     container_name: hetzner-dyndns
-    image: ghcr.io/Valentin-Kaiser/hdns:latest
+    image: ghcr.io/valentin-kaiser/hdns:latest
     ports:
       - "8080:8080"
     volumes:

@@ -6,6 +6,9 @@
 
 A modern web-based Dynamic DNS management solution specifically designed for Hetzner DNS services. HDNS provides an intuitive interface for managing DNS records and automatically updating them with your current IP address.
 
+
+![Manage DNS Records](./application/frontend/src/assets/dashboard.png)
+
 ## 🚀 Features
 
 - **Dynamic DNS Updates**: Automatically updates your DNS records with your current IP address

@@ -20,6 +20,15 @@ export interface Record extends BaseModel {
     last_update: string; // ISO date string
 }
 
+export interface RecordHistory extends BaseModel {
+    record_id: number;
+    record?: Record;
+    address_id: number;
+    address?: Address;
+    resolved_ip: string;
+    resolved_at: string; // ISO date string
+}
+
 export interface Zone {
     id: string;
     name: string;
@@ -40,5 +49,12 @@ export interface Config {
     log_level: number;
     web_port: number;
     refresh_interval: string;
-    dns_server: string;
+    dns_servers: string[];
+}
+
+export interface Resolution {
+    server: string;
+    addresses: string[];
+    response_time: number;
+    error: string | null;
 }
