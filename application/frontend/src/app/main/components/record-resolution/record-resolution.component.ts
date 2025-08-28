@@ -21,7 +21,7 @@ export class RecordResolutionComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   resolutions: Resolution[] = [];
   sub: Subscription | null = null;
-  interval: NodeJS.Timeout | null = null;
+  interval= null;
 
   constructor(
     private apiService: ApiService,
