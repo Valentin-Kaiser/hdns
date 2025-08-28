@@ -1,11 +1,9 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { NavController } from "@ionic/angular";
 import { catchError, defer, finalize, Observable, retry, shareReplay, Subject, takeUntil, tap, throwError, timer } from "rxjs";
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 import { environment } from "src/environments/environment";
 import { LoggerService } from "../logger/logger.service";
-import { NotifyService } from "../notify/notify.service";
 import { Address, Zone as DnsZone, Record, Resolution } from "./model/object";
 
 @Injectable({
@@ -19,9 +17,7 @@ export class ApiService {
 
     constructor(
         private logger: LoggerService,
-        private navController: NavController,
         private http: HttpClient,
-        private notifyService: NotifyService
     ) {
         this.logger.info(`${this.logType} ${this.logName} constructor`);
         this.buildURL();
@@ -234,9 +230,15 @@ export class ApiService {
                 : tap({}),
             takeUntil(kill$),
             shareReplay({ bufferSize: 1, refCount: true })
-        ) as Observable<TOut>;
+        ).pipe(tap({
+            next: (msg) => this.logger.info(`${this.logType} ${this.logName} WS message received`, msg),
+            error: (err) => this.logger.error(`${this.logType} ${this.logName} WS message error`, err)
+        })) as Observable<TOut>;
 
-        const send = (msg: TIn) => outgoing$.next(msg);
+        const send = (msg: TIn) => {
+            this.logger.info(`${this.logType} ${this.logName} WS message sent`, msg);
+            outgoing$.next(msg);
+        };
 
         const close = () => {
             // Stop retries and close current socket

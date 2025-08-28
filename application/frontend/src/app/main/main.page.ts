@@ -60,7 +60,9 @@ export class MainPage implements OnInit, OnDestroy {
     const addressStream = this.apiService.address();
     this.subscriptions.push(addressStream.messages$.subscribe({
       next: (message) => {
-        this.current = message;
+        if (!this.current || this.current.id !== message.id) {
+          this.current = message;
+        }
       },
       error: (error) => {
         console.error('Address stream error:', error);

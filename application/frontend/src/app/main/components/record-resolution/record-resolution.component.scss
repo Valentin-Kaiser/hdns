@@ -196,6 +196,11 @@
             }
           }
 
+          .ip-error {
+            font-size: 16px;
+            color: var(--ion-color-danger);
+          }
+
           .ip-metadata {
             display: flex;
             align-items: center;
