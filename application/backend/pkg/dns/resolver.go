@@ -119,6 +119,14 @@ func (r *Resolver) Lookup(record *model.Record) (*model.Address, bool, error) {
 		}
 	}
 
+	var current *model.Address
+	err := database.Execute(func(db *gorm.DB) error {
+		return db.Where("current = ?", true).First(&current).Error
+	})
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, false, apperror.NewError("failed to fetch current address").AddError(err)
+	}
+
 	domain := r.BuildDomain(record)
 	results, err := r.Resolve(domain)
 	if err != nil {
@@ -137,8 +145,7 @@ func (r *Resolver) Lookup(record *model.Record) (*model.Address, bool, error) {
 	// Check if any of the IPs match the current address
 	if record.Address != nil {
 		for _, ip := range ips {
-			if record.Address.IP == ip {
-				log.Trace().Str("domain", domain).Str("ip", ip).Msg("Record is up-to-date with current address")
+			if current.IP == ip {
 				return record.Address, true, nil
 			}
 		}
