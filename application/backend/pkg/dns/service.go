@@ -29,11 +29,11 @@ func Stop() {
 func Restart() {
 	Stop()
 	Start()
-	log.Info().Msg("DNS refresh cron job restarted")
+	log.Info().Msg("[DNS] refresh cron job restarted")
 }
 
 func Refresh() {
-	addr, err := UpdateAddress()
+	current, err := UpdateAddress()
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update public IP address")
 		return
@@ -47,18 +47,20 @@ func Refresh() {
 		return
 	}
 	for _, record := range records {
-		address, ok, err := Lookup(record)
+		rec, err := FetchRecord(record)
 		if err != nil {
-			log.Warn().Err(err).Msgf("failed to lookup DNS record %s.%s", record.Name, record.Domain)
-		}
-		if ok {
-			log.Info().Msgf("DNS record %s.%s is already up-to-date with address %s", record.Name, record.Domain, address.IP)
+			log.Error().Err(err).Msgf("failed to fetch DNS record %s.%s", record.Name, record.Domain)
 			continue
 		}
-		err = UpdateRecord(record, addr)
+
+		if rec.Value == current.IP {
+			log.Info().Msgf("[DNS] record %s.%s is already up-to-date with address %s", record.Name, record.Domain, current.IP)
+			continue
+		}
+
+		err = UpdateRecord(record, current)
 		if err != nil {
 			log.Error().Err(err).Msgf("failed to update DNS record %s.%s", record.Name, record.Domain)
-			continue
 		}
 	}
 }

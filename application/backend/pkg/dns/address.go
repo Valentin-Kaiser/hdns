@@ -61,7 +61,7 @@ func getPublicIP() (string, error) {
 			log.Error().Err(err).Msgf("resolver %s failed", r)
 			continue
 		}
-		log.Info().Msgf("resolved public IP: %s using resolver %s", addr, r)
+		log.Info().Msgf("[DNS] resolved public IP: %s using resolver %s", addr, r)
 		return addr, nil
 	}
 	return "", apperror.NewError("failed to resolve public IP address using all resolvers")
