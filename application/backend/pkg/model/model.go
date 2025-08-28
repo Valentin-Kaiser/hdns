@@ -10,7 +10,6 @@ func init() {
 	database.RegisterSchema(
 		&Address{},
 		&Record{},
-		&RecordHistory{},
 	)
 }
 
