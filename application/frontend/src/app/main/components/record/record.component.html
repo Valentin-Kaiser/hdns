@@ -47,7 +47,7 @@
         </ion-card-title>
       </ion-card-header>
 
-      <ion-card-content>
+      <ion-card-content (click)="onShowRecordIps(r)" class="record-content-clickable">
         <div class="record-details">
           <div class="detail-item" [class.record-updated]="isRecordUpdated(r)"
             [class.record-outdated]="!isRecordUpdated(r)">

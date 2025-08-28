@@ -7,8 +7,10 @@ import { ApiService } from '../global/services/api/api.service';
 import { Address, Config, Record } from '../global/services/api/model/object';
 import { NotifyService } from '../global/services/notify/notify.service';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
+import { IpHistoryComponent } from './components/ip-history/ip-history.component';
 import { LogComponent } from './components/log/log.component';
 import { RecordFormComponent } from './components/record-form/record-form.component';
+import { RecordIpsComponent } from './components/record-ips/record-ips.component';
 import { RecordComponent } from './components/record/record.component';
 
 @Component({
@@ -23,7 +25,9 @@ import { RecordComponent } from './components/record/record.component';
     RecordFormComponent,
     ConfigurationComponent,
     LogComponent,
-    RecordComponent
+    RecordComponent,
+    IpHistoryComponent,
+    RecordIpsComponent
   ]
 })
 export class MainPage implements OnInit, OnDestroy {
@@ -46,10 +50,17 @@ export class MainPage implements OnInit, OnDestroy {
   isLoadingLogs = false;
   isRefreshingLogs = false;
 
+  // IP History and Record IPs states
+  showIpHistory = false;
+  isLoadingHistory = false;
+  showRecordIps = false;
+  selectedRecord: Record | null = null;
+  isLoadingRecordIps = false;
+
   private autoRefreshSubscription?: Subscription;
 
   get hasActiveModal(): boolean {
-    return !!(this.record || this.showConfig || this.showLogs);
+    return !!(this.record || this.showConfig || this.showLogs || this.showIpHistory || this.showRecordIps);
   }
 
   constructor(
@@ -181,6 +192,10 @@ export class MainPage implements OnInit, OnDestroy {
       this.toggleConfig();
     } else if (this.showLogs) {
       this.toggleLogs();
+    } else if (this.showIpHistory) {
+      this.toggleIpHistory();
+    } else if (this.showRecordIps) {
+      this.closeRecordIps();
     }
   }
 
@@ -245,5 +260,29 @@ export class MainPage implements OnInit, OnDestroy {
     if (this.showLogs) {
       this.showConfig = false; // Close config when opening logs
     }
+  }
+
+  // IP History methods
+  toggleIpHistory() {
+    this.showIpHistory = !this.showIpHistory;
+    if (this.showIpHistory) {
+      this.showConfig = false;
+      this.showLogs = false;
+      this.showRecordIps = false;
+    }
+  }
+
+  // Record IPs methods
+  showRecordIpsFor(record: Record) {
+    this.selectedRecord = record;
+    this.showRecordIps = true;
+    this.showConfig = false;
+    this.showLogs = false;
+    this.showIpHistory = false;
+  }
+
+  closeRecordIps() {
+    this.showRecordIps = false;
+    this.selectedRecord = null;
   }
 }

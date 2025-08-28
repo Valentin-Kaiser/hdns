@@ -1,0 +1,54 @@
+<!-- IP History Section -->
+<ion-row class="ion-justify-content-center">
+  <ion-col size="12" size-md="8" size-lg="6">
+    <ion-card class="form-card">
+      <div class="form-header">
+        <h3 class="form-title">
+          <ion-icon name="time-outline"></ion-icon>
+          IP Address History
+        </h3>
+        <ion-button class="close-button" fill="clear" (click)="close()">
+          <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="form-content">
+        @if (isLoadingHistory) {
+        <div class="loading-container">
+          <ion-spinner></ion-spinner>
+          <ion-label>Loading IP history...</ion-label>
+        </div>
+        } @else if (ipHistory && ipHistory.length > 0) {
+        <div class="ip-history-list">
+          @for (address of ipHistory; track address.id) {
+          <div class="ip-history-item" [class.current-ip]="address.id === currentAddressId">
+            <div class="ip-details">
+              <div class="ip-address">
+                <ion-icon name="globe-outline" [color]="address.id === currentAddressId ? 'primary' : 'medium'"></ion-icon>
+                <span class="ip-text">{{ address.ip }}</span>
+                <div class="ip-metadata">
+                  <p class="timestamp">{{ address.created_at | date:'HH:mm dd.MM.yyyy' }}</p>
+                </div>
+                @if (address.id === currentAddressId) {
+                <ion-chip color="primary" size="small" slot="end">
+                  <ion-label>Current</ion-label>
+                </ion-chip>
+                }
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        } @else {
+        <div class="empty-state">
+          <ion-icon name="time-outline"></ion-icon>
+          <ion-label>
+            <h3>No IP History</h3>
+            <p>No previous IP addresses found for this host.</p>
+          </ion-label>
+        </div>
+        }
+      </div>
+    </ion-card>
+  </ion-col>
+</ion-row>

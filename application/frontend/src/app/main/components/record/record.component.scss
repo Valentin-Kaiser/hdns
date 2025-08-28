@@ -94,6 +94,16 @@
     position: relative;
     z-index: 1;
 
+    &.record-content-clickable {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: var(--ion-color-step-50);
+        border-radius: 0 0 8px 8px;
+      }
+    }
+
     ion-card-subtitle {
       color: var(--ion-color-medium);
       font-size: 12px;

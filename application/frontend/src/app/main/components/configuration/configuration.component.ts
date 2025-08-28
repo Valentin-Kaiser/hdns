@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { ApiService } from '../../../global/services/api/api.service';
 import { Config } from '../../../global/services/api/model/object';
@@ -11,41 +11,47 @@ import { NotifyService } from '../../../global/services/notify/notify.service';
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonicModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule
+  ]
 })
 export class ConfigurationComponent implements OnInit, OnChanges {
-  @Input() showConfig = false;
-  @Input() config: Config = null;
   @Input() isLoadingConfig = false;
   @Input() isSavingConfig = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() configSaved = new EventEmitter<Config>();
 
-  originalConfig: Config | null = null;
+  config: Config;
+  formGroup: FormGroup;
 
   constructor(
     private apiService: ApiService,
-    private notifyService: NotifyService
+    private notifyService: NotifyService,
+    private formBuilder: FormBuilder,
   ) { }
 
   ngOnInit() {
-    if (this.showConfig && !this.originalConfig) {
-      this.loadConfig();
-    }
+    this.loadConfig();
+
   }
 
   ngOnChanges() {
-    if (this.showConfig && !this.originalConfig) {
-      this.loadConfig();
-    }
+    this.loadConfig();
   }
 
   private loadConfig() {
     this.apiService.getConfig().subscribe({
       next: (config: Config) => {
         this.config = { ...config };
-        this.originalConfig = { ...config };
+        this.formGroup = this.formBuilder.group({
+          log_level: [this.config.log_level],
+          web_port: [this.config.web_port],
+          refresh_interval: [this.config.refresh_interval],
+        });
       },
       error: (error) => {
         console.error('Failed to load config:', error);
@@ -54,16 +60,19 @@ export class ConfigurationComponent implements OnInit, OnChanges {
     });
   }
 
-  hasConfigChanges(): boolean {
-    if (!this.originalConfig) return false;
-    return JSON.stringify(this.config) !== JSON.stringify(this.originalConfig);
-  }
 
   saveConfig() {
+    if (this.formGroup.invalid) {
+      return;
+    }
+
+    this.config.log_level = this.formGroup.value.log_level;
+    this.config.web_port = this.formGroup.value.web_port;
+    this.config.refresh_interval = this.formGroup.value.refresh_interval;
+
     this.apiService.updateConfig(this.config).subscribe({
       next: (updatedConfig: Config) => {
         this.config = { ...updatedConfig };
-        this.originalConfig = { ...updatedConfig };
         this.configSaved.emit(updatedConfig);
         this.notifyService.presentToast('Configuration updated successfully', 'Success');
       },
@@ -76,5 +85,31 @@ export class ConfigurationComponent implements OnInit, OnChanges {
 
   close() {
     this.closed.emit();
+  }
+
+  addDnsServer() {
+    if (!this.config.dns_servers) {
+      this.config.dns_servers = [];
+    }
+    this.config.dns_servers.push('');
+    this.formGroup.markAsDirty();
+  }
+
+  removeDnsServer(index: number) {
+    if (this.config.dns_servers && this.config.dns_servers.length > 1) {
+      this.config.dns_servers.splice(index, 1);
+    }
+    this.formGroup.markAsDirty();
+  }
+
+  updateDnsServer(index: number, value) {
+    if (this.config.dns_servers && this.config.dns_servers.length > index) {
+      this.config.dns_servers[index] = value;
+    }
+    this.formGroup.markAsDirty();
+  }
+
+  trackByIndex(index: number, item: any): number {
+    return index;
   }
 }

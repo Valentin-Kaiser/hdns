@@ -123,6 +123,52 @@
   }
 }
 
+// DNS Servers specific styling
+.dns-servers-container {
+  .dns-server-item {
+    margin-bottom: 8px;
+
+    ion-item {
+      --border-radius: 8px;
+      --border-color: var(--ion-color-step-300);
+
+      ion-button {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        margin: 0;
+      }
+    }
+  }
+
+  .add-server-btn {
+    margin-top: 12px;
+    --border-radius: 8px;
+    --border-color: var(--ion-color-primary);
+    --border-style: dashed;
+    --border-width: 2px;
+
+    &:hover {
+      // --background: var(--ion-color-secondary);
+      --border-color: white;
+      --color: white;
+    }
+  }
+}
+
+.dns-server-help {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--ion-color-step-50);
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
 // Animations
 @keyframes slideIn {
   from {

@@ -19,6 +19,7 @@ export class RecordComponent {
   @Output() editRecord = new EventEmitter<Record>();
   @Output() deleteRecord = new EventEmitter<Record>();
   @Output() refreshRecord = new EventEmitter<Record>();
+  @Output() showRecordIps = new EventEmitter<Record>();
 
   onAddRecord() {
     this.addRecord.emit();
@@ -34,6 +35,10 @@ export class RecordComponent {
 
   onRefreshRecord(record: Record) {
     this.refreshRecord.emit(record);
+  }
+
+  onShowRecordIps(record: Record) {
+    this.showRecordIps.emit(record);
   }
 
   isRecordUpdated(record: Record): boolean {
