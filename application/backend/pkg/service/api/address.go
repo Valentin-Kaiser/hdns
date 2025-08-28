@@ -24,15 +24,6 @@ func init() {
 		})
 
 	RegisterEndpoint(
-		EndpointTransportWebsocket,
-		EndpointEncodingJSON,
-		[]string{
-			"/api/stream/address",
-		}, map[string]Handler{
-			"WS": streamAddress,
-		})
-
-	RegisterEndpoint(
 		EndpointTransportHTTP,
 		EndpointEncodingJSON,
 		[]string{
@@ -71,27 +62,7 @@ func init() {
 			"/api/stream/address",
 		}, map[string]Handler{
 			"WS": streamAddress,
-		},
-	)
-
-	RegisterEndpoint(
-		EndpointTransportHTTP,
-		EndpointEncodingJSON,
-		[]string{
-			"/api/action/refresh/address",
-		}, map[string]Handler{
-			"GET": RefreshAddress,
 		})
-
-	RegisterEndpoint(
-		EndpointTransportHTTP,
-		EndpointEncodingJSON,
-		[]string{
-			"/api/action/resolve/{id}",
-		}, map[string]Handler{
-			"GET": ResolveAddress,
-		},
-	)
 
 	RegisterEndpoint(
 		EndpointTransportWebsocket,

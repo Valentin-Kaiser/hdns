@@ -44,7 +44,7 @@ export class MainPage implements OnInit, OnDestroy {
   selectedRecord: Record | null = null;
 
   subscriptions: Subscription[] = [];
-  interval;
+  interval: NodeJS.Timeout | null = null;
 
   get hasActiveModal(): boolean {
     return !!(this.record || this.showConfig || this.showLogs || this.showHistory || this.showRecordResolution);

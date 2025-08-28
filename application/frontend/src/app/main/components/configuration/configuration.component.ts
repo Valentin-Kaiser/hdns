@@ -121,7 +121,7 @@ export class ConfigurationComponent implements OnInit, OnChanges {
     this.formGroup.markAsDirty();
     if (this.config.dns_servers.some(s => !s || s.trim() === '')) {
       this.formGroup.controls['dns_servers'].setErrors({ invalid: true });
-      return
+      return;
     }
     this.formGroup.controls['dns_servers'].setErrors(null);
   }
