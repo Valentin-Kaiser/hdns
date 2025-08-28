@@ -8,8 +8,8 @@
           Application Logs
         </h3>
         <div class="header-actions">
-          <ion-button fill="clear" (click)="refreshLogs()" [disabled]="isRefreshingLogs" title="Refresh logs">
-            <ion-icon name="refresh-outline" [class.spin]="isRefreshingLogs"></ion-icon>
+          <ion-button fill="clear" (click)="refreshLogs()" [disabled]="loading" title="Refresh logs">
+            <ion-icon name="refresh-outline" [class.spin]="loading"></ion-icon>
           </ion-button>
           <ion-button class="close-button" fill="clear" (click)="close()">
             <ion-icon name="close-outline" slot="icon-only"></ion-icon>
@@ -18,7 +18,7 @@
       </div>
 
       <div class="form-content logs-content-wrapper">
-        @if (isLoadingLogs) {
+        @if (loading) {
         <div class="loading-container">
           <ion-spinner></ion-spinner>
           <ion-label>Loading logs...</ion-label>

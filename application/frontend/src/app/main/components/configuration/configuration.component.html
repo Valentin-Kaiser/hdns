@@ -13,7 +13,7 @@
       </div>
 
       <div class="form-content">
-        @if (isLoadingConfig) {
+        @if (loading) {
         <div class="loading-container">
           <ion-spinner></ion-spinner>
           <ion-label>Loading configuration...</ion-label>
@@ -93,8 +93,8 @@
 
           <div class="form-actions">
             <ion-button expand="block" class="create-button" (click)="saveConfig()"
-              [disabled]="!formGroup.dirty || formGroup.invalid || isSavingConfig">
-              @if (isSavingConfig) {
+              [disabled]="!formGroup.dirty || formGroup.invalid || saving || loading">
+              @if (saving) {
               <ion-spinner slot="start" name="crescent"></ion-spinner>
               Saving...
               } @else {

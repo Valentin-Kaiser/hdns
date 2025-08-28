@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnChanges, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { ApiService } from '../../../global/services/api/api.service';
@@ -13,13 +13,10 @@ import { NotifyService } from '../../../global/services/notify/notify.service';
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class LogComponent implements OnInit, OnChanges {
-  @Input() showLogs = false;
-  @Input() logs = '';
-  @Input() isLoadingLogs = false;
-  @Input() isRefreshingLogs = false;
+  @Output() onClose = new EventEmitter<void>();
 
-  @Output() closed = new EventEmitter<void>();
-  @Output() logsRefreshed = new EventEmitter<string>();
+  logs: string = '';
+  loading: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -27,47 +24,50 @@ export class LogComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
-    if (this.showLogs && !this.logs) {
-      this.loadLogs();
-    }
+    this.loadLogs();
   }
 
   ngOnChanges() {
-    if (this.showLogs && !this.logs) {
+    if (!this.logs) {
       this.loadLogs();
     }
   }
 
   private loadLogs() {
+    this.loading = true;
     this.apiService.log().subscribe({
       next: (logs: string) => {
         this.logs = logs || 'No logs available';
-        this.logsRefreshed.emit(this.logs);
       },
       error: (error) => {
         console.error('Failed to load logs:', error);
         this.notifyService.presentErrorToast('Logs Error', 'Failed to load logs');
         this.logs = 'Failed to load logs';
-        this.logsRefreshed.emit(this.logs);
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
 
   refreshLogs() {
+    this.loading = true;
     this.apiService.log().subscribe({
       next: (logs: string) => {
         this.logs = logs || 'No logs available';
-        this.logsRefreshed.emit(this.logs);
         this.notifyService.presentToast('Logs refreshed', 'Success');
       },
       error: (error) => {
         console.error('Failed to refresh logs:', error);
         this.notifyService.presentErrorToast('Logs Error', 'Failed to refresh logs');
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
 
   close() {
-    this.closed.emit();
+    this.onClose.emit();
   }
 }

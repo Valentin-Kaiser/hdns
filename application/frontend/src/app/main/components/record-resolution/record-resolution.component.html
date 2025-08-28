@@ -13,13 +13,13 @@
 
       <div class="form-content">
         <!-- Loading State -->
-        <div *ngIf="isLoadingRecordIps" class="loading-container">
+        <div *ngIf="loading" class="loading-container">
           <ion-spinner color="primary"></ion-spinner>
           <p>Resolving DNS record...</p>
         </div>
 
         <!-- Record Info -->
-        <div *ngIf="!isLoadingRecordIps && record" class="record-info">
+        <div *ngIf="!loading && record" class="record-info">
           <div class="record-details">
             <div class="record-name">
               <ion-icon name="link-outline"></ion-icon>
@@ -30,14 +30,14 @@
         </div>
 
         <!-- Empty State -->
-        <div *ngIf="!isLoadingRecordIps && resolutions.length === 0" class="empty-state">
+        <div *ngIf="!loading && resolutions.length === 0" class="empty-state">
           <ion-icon name="alert-circle-outline"></ion-icon>
           <h3>No IP Addresses Found</h3>
           <p>This DNS record could not be resolved to any IP addresses.</p>
         </div>
 
         <!-- IP Addresses List -->
-        <div *ngIf="!isLoadingRecordIps && resolutions.length > 0" class="resolved-ips-list">
+        <div *ngIf="!loading && resolutions.length > 0" class="resolved-ips-list">
           <ion-grid>
             <ion-row>
               <ion-col size="6" *ngFor="let res of resolutions;">

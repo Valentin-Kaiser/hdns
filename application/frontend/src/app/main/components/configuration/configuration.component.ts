@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnChanges, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { ApiService } from '../../../global/services/api/api.service';
@@ -19,14 +19,13 @@ import { NotifyService } from '../../../global/services/notify/notify.service';
   ]
 })
 export class ConfigurationComponent implements OnInit, OnChanges {
-  @Input() isLoadingConfig = false;
-  @Input() isSavingConfig = false;
-
-  @Output() closed = new EventEmitter<void>();
-  @Output() configSaved = new EventEmitter<Config>();
+  @Output() onClose = new EventEmitter<void>();
+  @Output() onChange = new EventEmitter<Config>();
 
   config: Config;
   formGroup: FormGroup;
+  loading: boolean = false;
+  saving: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -44,6 +43,7 @@ export class ConfigurationComponent implements OnInit, OnChanges {
   }
 
   private loadConfig() {
+    this.loading = true;
     this.apiService.config().subscribe({
       next: (config: Config) => {
         this.config = { ...config };
@@ -57,6 +57,9 @@ export class ConfigurationComponent implements OnInit, OnChanges {
       error: (error) => {
         console.error('Failed to load config:', error);
         this.notifyService.presentErrorToast('Configuration Error', 'Failed to load configuration');
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
@@ -67,6 +70,7 @@ export class ConfigurationComponent implements OnInit, OnChanges {
       return;
     }
 
+    this.saving = true;
     this.config.log_level = this.formGroup.value.log_level;
     this.config.web_port = this.formGroup.value.web_port;
     this.config.refresh_interval = this.formGroup.value.refresh_interval;
@@ -74,18 +78,21 @@ export class ConfigurationComponent implements OnInit, OnChanges {
     this.apiService.updateConfig(this.config).subscribe({
       next: (updatedConfig: Config) => {
         this.config = { ...updatedConfig };
-        this.configSaved.emit(updatedConfig);
+        this.onChange.emit(updatedConfig);
         this.notifyService.presentToast('Configuration updated successfully', 'Success');
       },
       error: (error) => {
         console.error('Failed to update config:', error);
         this.notifyService.presentErrorToast('Configuration Error', 'Failed to update configuration');
+      },
+      complete: () => {
+        this.saving = false;
       }
     });
   }
 
   close() {
-    this.closed.emit();
+    this.onClose.emit();
   }
 
   addDnsServer() {
@@ -114,9 +121,9 @@ export class ConfigurationComponent implements OnInit, OnChanges {
     this.formGroup.markAsDirty();
     if (this.config.dns_servers.some(s => !s || s.trim() === '')) {
       this.formGroup.controls['dns_servers'].setErrors({ invalid: true });
-    } else {
-      this.formGroup.controls['dns_servers'].setErrors(null);
+      return
     }
+    this.formGroup.controls['dns_servers'].setErrors(null);
   }
 
   trackByIndex(index: number, item: any): number {

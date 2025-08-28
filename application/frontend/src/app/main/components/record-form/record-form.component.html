@@ -4,7 +4,7 @@
     <ion-card class="form-card">
       <div class="form-header">
         <h3 class="form-title">DNS Record</h3>
-        <ion-button class="close-button" fill="clear" (click)="cancel()">
+        <ion-button class="close-button" fill="clear" (click)="close()">
           <ion-icon name="close-outline" slot="icon-only"></ion-icon>
         </ion-button>
       </div>
@@ -106,8 +106,8 @@
 
         <!-- Create Button -->
         @if (formSteps.name) {
-        <ion-button class="create-button" expand="block" (click)="record.id ? updateRecord() : createRecord()" [disabled]="!isFormValid()">
-          @if (isLoading) {
+        <ion-button class="create-button" expand="block" (click)="submit()" [disabled]="!isFormValid()">
+          @if (loading) {
           <ion-spinner name="crescent" slot="start"></ion-spinner>
           Saving Record...
           } @else {

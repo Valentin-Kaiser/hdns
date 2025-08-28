@@ -15,12 +15,10 @@ import { NotifyService } from '../../../global/services/notify/notify.service';
 })
 export class RecordFormComponent implements OnInit, OnChanges {
   @Input() record: Record | null = null;
-  @Input() isLoading = false;
+  @Output() onChange = new EventEmitter<Record>();
+  @Output() onClose = new EventEmitter<void>();
 
-  @Output() recordCreated = new EventEmitter<Record>();
-  @Output() recordUpdated = new EventEmitter<Record>();
-  @Output() cancelled = new EventEmitter<void>();
-
+  loading: boolean = false;
   zones: DnsZone[] = [];
   tokenError = false;
 
@@ -34,7 +32,7 @@ export class RecordFormComponent implements OnInit, OnChanges {
   constructor(
     private apiService: ApiService,
     private notifyService: NotifyService
-  ) {}
+  ) { }
 
   ngOnInit() {
     if (this.record) {
@@ -98,49 +96,31 @@ export class RecordFormComponent implements OnInit, OnChanges {
     return Object.values(this.formSteps).every(step => step);
   }
 
-  createRecord() {
+  submit() {
     if (!this.record || !this.isFormValid()) {
       this.notifyService.presentErrorToast('Form Validation Error', 'Please fill in all required fields');
       return;
     }
 
-    this.apiService.createRecord(this.record as Record).subscribe({
+    this.loading = true;
+    let action = this.record.id ? this.apiService.updateRecord(this.record) : this.apiService.createRecord(this.record);
+    action.subscribe({
       next: (response) => {
         if (response) {
-          this.recordCreated.emit(response);
-          this.notifyService.presentToast('DNS record created successfully');
+          this.onChange.emit(response);
+          this.notifyService.presentToast('DNS record saved successfully');
         }
       },
       error: (error) => {
-        this.notifyService.presentErrorToast('Failed to create DNS record', error);
+        this.notifyService.presentErrorToast('Failed to save DNS record', error);
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
 
-  updateRecord() {
-    if (!this.record || !this.isFormValid()) {
-      this.notifyService.presentErrorToast('Form Validation Error', 'Please fill in all required fields');
-      return;
-    }
-
-    this.apiService.updateRecord(this.record).subscribe({
-      next: (response) => {
-        if (response) {
-          this.recordUpdated.emit(response);
-          this.notifyService.presentToast('DNS record updated successfully');
-        }
-      },
-      error: (error) => {
-        console.error('Update record error:', error);
-        this.notifyService.presentErrorToast(
-          'Update Error',
-          error || 'Failed to update DNS record'
-        );
-      }
-    });
-  }
-
-  cancel() {
-    this.cancelled.emit();
+  close() {
+    this.onClose.emit();
   }
 }

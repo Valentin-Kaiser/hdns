@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../global/services/api/api.service';
-import { Address, Config, Record } from '../global/services/api/model/object';
+import { Address, Record } from '../global/services/api/model/object';
 import { NotifyService } from '../global/services/notify/notify.service';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
-import { IpHistoryComponent } from './components/ip-history/ip-history.component';
+import { HistoryComponent } from './components/history/history.component';
 import { LogComponent } from './components/log/log.component';
 import { RecordFormComponent } from './components/record-form/record-form.component';
 import { RecordResolutionComponent } from './components/record-resolution/record-resolution.component';
@@ -26,7 +26,7 @@ import { RecordComponent } from './components/record/record.component';
     ConfigurationComponent,
     LogComponent,
     RecordComponent,
-    IpHistoryComponent,
+    HistoryComponent,
     RecordResolutionComponent
   ]
 })
@@ -39,15 +39,12 @@ export class MainPage implements OnInit, OnDestroy {
 
   showConfig = false;
   showLogs = false;
-  config: Config = null;
-  isLoadingConfig = false;
-  isSavingConfig = false;
-
   showHistory = false;
   showRecordResolution = false;
   selectedRecord: Record | null = null;
 
   subscriptions: Subscription[] = [];
+  interval;
 
   get hasActiveModal(): boolean {
     return !!(this.record || this.showConfig || this.showLogs || this.showHistory || this.showRecordResolution);
@@ -83,13 +80,14 @@ export class MainPage implements OnInit, OnDestroy {
     recordStream.send(null);
     addressStream.send(null);
 
-    setInterval(() => {
+    this.interval = setInterval(() => {
       addressStream.send(null);
       recordStream.send(null);
-    }, 2000);
+    }, 10000);
   }
 
   ngOnDestroy() {
+    this.interval && clearInterval(this.interval);
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
@@ -101,37 +99,25 @@ export class MainPage implements OnInit, OnDestroy {
     this.record = { ...record }; // Create a copy to avoid modifying the original
   }
 
-  cancel() {
-    this.record = null;
-  }
-
-  // Event handlers for child components
-  onRecordCreated(newRecord: Record) {
-    this.records.push(newRecord);
-    this.cancel();
-  }
-
-  onRecordUpdated(updatedRecord: Record) {
-    const index = this.records.findIndex(r => r.id === updatedRecord.id);
-    if (index !== -1) {
-      this.records[index] = updatedRecord;
+  onRecordChange(record: Record) {
+    const index = this.records.findIndex(r => r.id === record.id);
+    if (index === -1) {
+      this.records.push(record);
+    } else {
+      this.records[index] = record;
     }
-    this.cancel();
-  }
-
-  onConfigSaved(updatedConfig: Config) {
-    this.config = { ...updatedConfig };
+    this.record = null;
   }
 
   closeActiveForm() {
     if (this.record) {
-      this.cancel();
+      this.record = null;
     } else if (this.showConfig) {
       this.toggleConfig();
     } else if (this.showLogs) {
       this.toggleLogs();
     } else if (this.showHistory) {
-      this.toggleIpHistory();
+      this.toggleHistory();
     } else if (this.showRecordResolution) {
       this.closeRecordIps();
     }
@@ -201,7 +187,7 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   // IP History methods
-  toggleIpHistory() {
+  toggleHistory() {
     this.showHistory = !this.showHistory;
     if (this.showHistory) {
       this.showConfig = false;
@@ -211,7 +197,7 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   // Record IPs methods
-  showRecordIpsFor(record: Record) {
+  toggle(record: Record) {
     this.selectedRecord = record;
     this.showRecordResolution = true;
     this.showConfig = false;

@@ -7,29 +7,6 @@ import { ApiService } from '../../../global/services/api/api.service';
 import { Record, Resolution } from '../../../global/services/api/model/object';
 import { NotifyService } from '../../../global/services/notify/notify.service';
 
-interface ResolvedIP {
-  address: string;
-  ttl?: number;
-  provider?: string;
-  responseTime?: number;
-  location?: {
-    city: string;
-    country: string;
-    org?: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    };
-  };
-}
-
-interface ResolutionStats {
-  queryTime: number;
-  dnsServer: string;
-  status: string;
-  timestamp: string;
-}
-
 @Component({
   selector: 'app-record-resolution',
   templateUrl: './record-resolution.component.html',
@@ -39,12 +16,12 @@ interface ResolutionStats {
 })
 export class RecordResolutionComponent implements OnInit, OnDestroy {
   @Input() record: Record | null = null;
-  @Input() isLoadingRecordIps = false;
+  @Output() onClose = new EventEmitter<void>();
 
-  @Output() closed = new EventEmitter<void>();
-
+  loading: boolean = true;
   resolutions: Resolution[] = [];
-  private sub: Subscription | null = null;
+  sub: Subscription | null = null;
+  interval: any;
 
   constructor(
     private apiService: ApiService,
@@ -57,6 +34,7 @@ export class RecordResolutionComponent implements OnInit, OnDestroy {
       this.sub = addressStream.messages$.subscribe({
         next: (message) => {
           this.resolutions = message;
+          this.loading = false;
         },
         error: (error) => {
           console.error('Address stream error:', error);
@@ -64,13 +42,14 @@ export class RecordResolutionComponent implements OnInit, OnDestroy {
       });
 
       addressStream.send(null);
-      setInterval(() => {
+      this.interval = setInterval(() => {
         addressStream.send(null);
       }, 5000);
     }
   }
 
   ngOnDestroy() {
+    this.interval && clearInterval(this.interval);
     this.sub?.unsubscribe();
   }
 
@@ -113,6 +92,6 @@ export class RecordResolutionComponent implements OnInit, OnDestroy {
   }
 
   close() {
-    this.closed.emit();
+    this.onClose.emit();
   }
 }

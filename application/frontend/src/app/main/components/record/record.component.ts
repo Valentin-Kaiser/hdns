@@ -19,27 +19,7 @@ export class RecordComponent {
   @Output() editRecord = new EventEmitter<Record>();
   @Output() deleteRecord = new EventEmitter<Record>();
   @Output() refreshRecord = new EventEmitter<Record>();
-  @Output() showRecordIps = new EventEmitter<Record>();
-
-  onAddRecord() {
-    this.addRecord.emit();
-  }
-
-  onEditRecord(record: Record) {
-    this.editRecord.emit(record);
-  }
-
-  onDeleteRecord(record: Record) {
-    this.deleteRecord.emit(record);
-  }
-
-  onRefreshRecord(record: Record) {
-    this.refreshRecord.emit(record);
-  }
-
-  onShowRecordIps(record: Record) {
-    this.showRecordIps.emit(record);
-  }
+  @Output() showRecordResolution = new EventEmitter<Record>();
 
   isRecordUpdated(record: Record): boolean {
     return record.address_id === this.current?.id;
