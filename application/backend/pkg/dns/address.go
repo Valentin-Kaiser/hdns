@@ -40,6 +40,17 @@ func UpdateAddress() (*model.Address, error) {
 	if err != nil {
 		return nil, apperror.NewError("failed to save public IP address to database").AddError(err)
 	}
+	err = database.Execute(func(db *gorm.DB) error {
+		err := db.Model(&model.Address{}).Where("current = ?", true).Update("current", false).Error
+		if err != nil {
+			return apperror.NewError("failed to update current address in database").AddError(err)
+		}
+
+		return db.Model(addr).Update("current", true).Error
+	})
+	if err != nil {
+		return nil, apperror.NewError("failed to update current address in database").AddError(err)
+	}
 	return addr, nil
 }
 

@@ -2,388 +2,64 @@
   <ion-toolbar>
     <ion-img src="/assets/hdns.png" slot="start" class="header-logo"></ion-img>
     @if (current?.ip) {
-    <ion-chip color="light" slot="end" outline class="address-chip">
+    <ion-chip color="light" slot="end" outline class="address-chip ion-hide-sm-down" (click)="toggleHistory()">
       <ion-icon name="globe-outline"></ion-icon>
       <ion-label>{{ current.ip }}</ion-label>
     </ion-chip>
     }
     <ion-buttons slot="end">
+      <ion-button fill="clear" class="ion-hide-sm-up" [disabled]="!current?.ip" (click)="toggleHistory()">
+        <ion-icon name="globe-outline"></ion-icon>
+      </ion-button>
       <ion-button fill="clear" (click)="toggleLogs()" title="View Logs" [color]="showLogs ? 'primary' : ''"
-        [disabled]="record">
+        [disabled]="hasActiveModal">
         <ion-icon name="document-text-outline"></ion-icon>
       </ion-button>
       <ion-button fill="clear" (click)="toggleConfig()" title="Configuration" [color]="showConfig ? 'primary' : ''"
-        [disabled]="record">
+        [disabled]="hasActiveModal">
         <ion-icon name="settings-outline"></ion-icon>
-      </ion-button>
-      <ion-button fill="clear" (click)="refresh()" [disabled]="isRefreshing">
-        <ion-icon name="refresh-outline" [class.spin]="isRefreshing"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <!-- Background Blur Backdrop -->
-  @if (record || showConfig || showLogs) {
+  @if (hasActiveModal) {
   <div class="backdrop-blur" (click)="closeActiveForm()"></div>
   }
 
   <ion-grid class="ion-no-padding ion-no-margin">
-
-    
-    <!-- Record Form -->
     @if (record) {
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-md="8" size-lg="6">
-        <ion-card class="form-card">
-          <div class="form-header">
-            <h3 class="form-title">DNS Record</h3>
-            <ion-button class="close-button" fill="clear" (click)="cancel()">
-              <ion-icon name="close-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-          </div>
-
-          <div class="form-content">
-            <!-- Step 1: Hetzner Token -->
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">1</span>
-                Hetzner API Token
-              </div>
-              <ion-item>
-                <ion-input type="password" placeholder="Enter your Hetzner API token" [(ngModel)]="record.token"
-                  debounce="300" (ionInput)="onFormFieldChange()" fill="outline">
-                </ion-input>
-              </ion-item>
-            </div>
-
-            <!-- Token Error Message -->
-            @if (formSteps.token && tokenError) {
-            <div class="form-step">
-              <ion-item color="danger">
-                <ion-icon name="warning-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <p>Invalid API token or no zones found. Please check your Hetzner API token.</p>
-                </ion-label>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 2: Zone ID -->
-            @if (formSteps.token && !tokenError) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">2</span>
-                Zone ID
-              </div>
-              <ion-item>
-                <ion-select type="text" placeholder="Enter DNS zone ID" [(ngModel)]="record.zone_id"
-                  (ionChange)="setZone($event.detail.value); onFormFieldChange()" fill="outline" interface="popover">
-                  <ion-select-option *ngFor="let zone of zones" [value]="zone.id">
-                    {{ zone.name }}
-                  </ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 3: Record Type -->
-            @if (formSteps.zoneId) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">3</span>
-                Record Type
-              </div>
-              <ion-item>
-                <ion-select placeholder="Select record type" [(ngModel)]="record.type" (ionChange)="onFormFieldChange()"
-                  fill="outline" interface="popover">
-                  <ion-select-option value="A">A - IPv4 Address</ion-select-option>
-                  <ion-select-option value="AAAA">AAAA - IPv6 Address</ion-select-option>
-                  <ion-select-option value="CNAME">CNAME - Canonical Name</ion-select-option>
-                  <ion-select-option value="MX">MX - Mail Exchange</ion-select-option>
-                  <ion-select-option value="TXT">TXT - Text Record</ion-select-option>
-                  <ion-select-option value="NS">NS - Name Server</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 4: Record Name -->
-            @if (formSteps.type) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">4</span>
-                Record Name
-              </div>
-              <ion-item>
-                <ion-input type="text" placeholder="e.g., www, mail, api" [(ngModel)]="record.name"
-                  (ionInput)="onFormFieldChange()" fill="outline">
-                </ion-input>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Step 5: TTL (optional) -->
-            @if (formSteps.name) {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">5</span>
-                TTL - Time To Live (optional)
-              </div>
-              <ion-item>
-                <ion-input type="number" placeholder="Enter TTL in seconds" [(ngModel)]="record.ttl"
-                  (ionInput)="onFormFieldChange()" fill="outline" min="60" step="60">
-                </ion-input>
-              </ion-item>
-            </div>
-            }
-
-            <!-- Create Button -->
-            @if (formSteps.name) {
-            <ion-button class="create-button" expand="block" (click)="record.id ? updateRecord() : createRecord()" [disabled]="!isFormValid()">
-              @if (isLoading) {
-              <ion-spinner name="crescent" slot="start"></ion-spinner>
-              Saving Record...
-              } @else {
-              <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-              Save DNS Record
-              }
-            </ion-button>
-            }
-          </div>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+    <app-record-form [record]="record" (onChange)="onRecordChange($event)" (onCancel)="record = null">
+    </app-record-form>
     }
 
-    <!-- Configuration Section -->
     @if (showConfig) {
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-md="8" size-lg="6">
-        <ion-card class="form-card">
-          <div class="form-header">
-            <h3 class="form-title">
-              <ion-icon name="settings-outline"></ion-icon>
-              Configuration
-            </h3>
-            <ion-button class="close-button" fill="clear" (click)="toggleConfig()">
-              <ion-icon name="close-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-          </div>
-
-          <div class="form-content">
-            @if (isLoadingConfig) {
-            <div class="loading-container">
-              <ion-spinner></ion-spinner>
-              <ion-label>Loading configuration...</ion-label>
-            </div>
-            } @else {
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">1</span>
-                Log Level
-              </div>
-              <ion-item>
-                <ion-select [(ngModel)]="config.log_level" name="log_level" interface="popover"
-                  placeholder="Select log level">
-                  <ion-select-option [value]="-1">Trace</ion-select-option>
-                  <ion-select-option [value]="0">Debug</ion-select-option>
-                  <ion-select-option [value]="1">Info</ion-select-option>
-                  <ion-select-option [value]="2">Warning</ion-select-option>
-                  <ion-select-option [value]="3">Error</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">2</span>
-                Web Port
-              </div>
-              <ion-item>
-                <ion-input type="number" [(ngModel)]="config.web_port" name="web_port" placeholder="8080" min="1"
-                  max="65535" fill="outline">
-                </ion-input>
-              </ion-item>
-            </div>
-
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">3</span>
-                Refresh Interval
-              </div>
-              <ion-item>
-                <ion-input [(ngModel)]="config.refresh_interval" name="refresh_interval" placeholder="5m"
-                  helper-text="Examples: 30s, 5m, 1h" fill="outline">
-                </ion-input>
-              </ion-item>
-            </div>
-
-            <div class="form-step">
-              <div class="step-label">
-                <span class="step-number">4</span>
-                DNS Server
-              </div>
-              <ion-item>
-                <ion-input [(ngModel)]="config.dns_server" name="dns_server" placeholder="1.1.1.1" fill="outline">
-                </ion-input>
-              </ion-item>
-            </div>
-
-            <div class="form-actions">
-              <ion-button expand="block" class="create-button" (click)="saveConfig()" [disabled]="!hasConfigChanges() || isSavingConfig">
-                @if (isSavingConfig) {
-                <ion-spinner slot="start" name="crescent"></ion-spinner>
-                Saving...
-                } @else {
-                <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-                Save Configuration
-                }
-              </ion-button>
-            </div>
-            }
-          </div>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+    <app-configuration (onClose)="toggleConfig()" (onChange)=" showConfig = false">
+    </app-configuration>
     }
 
-    <!-- Logs Section -->
     @if (showLogs) {
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-md="10" size-lg="12">
-        <ion-card class="form-card full-height">
-          <div class="form-header">
-            <h3 class="form-title">
-              <ion-icon name="document-text-outline"></ion-icon>
-              Application Logs
-            </h3>
-            <div class="header-actions">
-              <ion-button fill="clear" (click)="refreshLogs()" [disabled]="isRefreshingLogs" title="Refresh logs">
-                <ion-icon name="refresh-outline" [class.spin]="isRefreshingLogs"></ion-icon>
-              </ion-button>
-              <ion-button class="close-button" fill="clear" (click)="toggleLogs()">
-                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
-              </ion-button>
-            </div>
-          </div>
-
-          <div class="form-content logs-content-wrapper">
-            @if (isLoadingLogs) {
-            <div class="loading-container">
-              <ion-spinner></ion-spinner>
-              <ion-label>Loading logs...</ion-label>
-            </div>
-            } @else {
-            <div class="logs-content full-height">
-              <pre class="log-text full-height">{{ logs }}</pre>
-            </div>
-            }
-          </div>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+    <app-log (onClose)="toggleLogs()">
+    </app-log>
     }
 
-    @if ((!records || records.length === 0 ) && !record) {
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-md="8" size-lg="6">
-        <div class="empty-state">
-          <ion-icon name="dns-outline"></ion-icon>
-          <ion-label>
-            <h2>No DNS Records Found</h2>
-            <p>Create your first DNS record to get started with dynamic DNS management.</p>
-          </ion-label>
-          <ion-button expand="block" fill="outline" (click)="addRecord()" class="ion-margin-top"
-            [disabled]="showLogs || showConfig">
-            <ion-label>
-              Add Record
-            </ion-label>
-          </ion-button>
-        </div>
-      </ion-col>
-    </ion-row>
+    @if (showHistory) {
+    <app-history (onClose)="toggleHistory()" [current]="current">
+    </app-history>
     }
 
-    @if (records && records.length > 0) {
-    <ion-row>
-      @for (r of records; track trackByRecordId($index, r)) {
-      <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card class="record-card">
-          <div class="record-actions-bar">
-            <ion-button size="small" fill="clear" color="medium" (click)="refreshRecord(r)" title="Refresh Record"
-              [disabled]="showLogs || showConfig || record" class="action-btn">
-              <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-            <ion-button size="small" fill="clear" color="warning" (click)="editRecordAction(r)"
-              [disabled]="showLogs || showConfig || record" title="Edit Record" class="action-btn">
-              <ion-icon name="create-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-            <ion-button size="small" fill="clear" color="danger" (click)="deleteRecord(r)" title="Delete Record"
-              [disabled]="showLogs || showConfig || record" class="action-btn">
-              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-          </div>
-
-          <ion-card-header>
-            <ion-card-title>
-              <span>{{ r.name }}.{{ r.domain }}</span>
-              <span class="record-type-badge" [style.background]="'var(--ion-color-' + getRecordTypeColor(r.type) + ')'"
-                        [style.color]="'var(--ion-color-' + getRecordTypeColor(r.type) + '-contrast)'">
-              {{ r.type }}
-              </span>
-            </ion-card-title>
-          </ion-card-header>
-
-          <ion-card-content>
-            <div class="record-details">
-              <div class="detail-item" [class.record-updated]="isRecordUpdated(r)"
-                [class.record-outdated]="!isRecordUpdated(r)">
-                <ion-icon name="code-working-outline"></ion-icon>
-                <span class="detail-value">{{ r.address?.ip }}</span>
-              </div>
-              <div class="detail-item">
-                <ion-icon name="time-outline"></ion-icon>
-                <span class="detail-label">last update</span>
-                @if (isUpdated(r)) {
-                <span class="detail-value">{{ getLastUpdatedText(r.last_update) }}</span>
-                } @else {
-                <span class="detail-value">Never</span>
-                }
-              </div>
-              <div class="detail-item">
-                <ion-icon name="timer-outline"></ion-icon>
-                <span class="detail-label">TTL:</span>
-                <span class="detail-value">{{ r.ttl }}s</span>
-              </div>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      }
-
-      <ion-col size="12" size-md="6" size-lg="4" size-xl="3" class="ion-hide-md-down">
-        @if (!record) {
-        <ion-card class="form-card add-record" (click)="addRecord()" button *ngIf="!showLogs && !showConfig">
-          <div class="add-content">
-            <ion-icon name="add-circle-outline"></ion-icon>
-            <div class="add-title">Add New Record</div>
-            <div class="add-subtitle">Create a new DNS record</div>
-          </div>
-        </ion-card>
-        }
-      </ion-col>
-    </ion-row>
+    @if (showRecordResolution) {
+    <app-record-resolution [record]="selectedRecord" (onClose)="closeRecordIps()">
+    </app-record-resolution>
     }
+
+    @if (!hasActiveModal) {
+    <app-record [records]="records" [current]="current" (addRecord)="addRecord()"
+      (editRecord)="editRecordAction($event)" (deleteRecord)="deleteRecord($event)"
+      (refreshRecord)="refreshRecord($event)" (showRecordResolution)="toggle($event)">
+    </app-record>
+    }
+
   </ion-grid>
-
-  <!-- Floating Action Button for Mobile -->
-  @if (!record && records && records.length > 0) {
-  <ion-fab class="fab-add ion-hide-md-up" vertical="bottom" horizontal="end">
-    <ion-fab-button (click)="addRecord()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-  }
 </ion-content>

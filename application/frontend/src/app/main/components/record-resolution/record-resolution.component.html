@@ -1,0 +1,75 @@
+<ion-row class="ion-justify-content-center">
+  <ion-col size="12" size-md="8" size-lg="6">
+    <ion-card class="form-card">
+      <div class="form-header">
+        <h4 class="form-title">
+          <ion-icon name="globe-outline"></ion-icon>
+          DNS Record IP Addresses
+        </h4>
+        <ion-button fill="clear" class="close-button" (click)="close()" aria-label="Close">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="form-content">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="loading-container">
+          <ion-spinner color="primary"></ion-spinner>
+          <p>Resolving DNS record...</p>
+        </div>
+
+        <!-- Record Info -->
+        <div *ngIf="!loading && record" class="record-info">
+          <div class="record-details">
+            <div class="record-name">
+              <ion-icon name="link-outline"></ion-icon>
+              <span class="name-text">{{ record.name }}.{{ record.domain }}</span>
+              <ion-chip class="record-type-chip">{{ record.type }}</ion-chip>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loading && resolutions.length === 0" class="empty-state">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <h3>No IP Addresses Found</h3>
+          <p>This DNS record could not be resolved to any IP addresses.</p>
+        </div>
+
+        <!-- IP Addresses List -->
+        <div *ngIf="!loading && resolutions.length > 0" class="resolved-ips-list">
+          <ion-grid>
+            <ion-row>
+              <ion-col size="6" *ngFor="let res of resolutions;">
+                <div class="ip-item">
+                  <div class="ip-details">
+                    <div class="ip-address" *ngFor="let ip of res.addresses">
+                      <ion-icon [name]="getIpTypeIcon(ip)" [class.ipv4-icon]="isIPv4(ip)"
+                        [class.ipv6-icon]="isIPv6(ip)">
+                      </ion-icon>
+                      <span class="ip-text">{{ ip }}</span>
+                      <ion-chip class="ip-type-chip" [color]="getIpTypeColor(ip)">
+                        {{ getIpType(ip) }}
+                      </ion-chip>
+                    </div>
+
+                    <div class="ip-metadata" *ngIf="res.server && res.response_time">
+                      <span class="provider" *ngIf="res.server">
+                        <ion-icon name="server-outline"></ion-icon>
+                        {{ res.server }}
+                      </span>
+                      <span class="response-time" *ngIf="res.response_time">
+                        <ion-icon name="time-outline"></ion-icon>
+                        {{ res.response_time }}ms
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </div>
+    </ion-card>
+  </ion-col>
+</ion-row>

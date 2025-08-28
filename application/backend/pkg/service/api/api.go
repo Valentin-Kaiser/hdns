@@ -162,35 +162,24 @@ func (e *Endpoint) HandleWebsocket(w http.ResponseWriter, r *http.Request, conn 
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	for {
-		resp, err := handler(&Context{
-			req:  r,
-			resp: w,
-			conn: conn,
-			info: make(map[string]any),
-		})
-		if err != nil {
-			werr := conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-			if werr != nil {
-				log.Error().Err(werr).Msg("error writing message")
-				return
-			}
-			http.Error(w, err.Error(), http.StatusBadRequest)
+	conn.SetCloseHandler(func(code int, text string) error {
+		log.Trace().Msg("Websocket connection closed")
+		return nil
+	})
+	_, err := handler(&Context{
+		req:  r,
+		resp: w,
+		conn: conn,
+		info: make(map[string]any),
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("an api error occurred")
+		werr := conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		if werr != nil {
+			log.Error().Err(werr).Msg("error writing message")
 			return
 		}
-		if resp != nil {
-			w.Header().Set("Content-Type", "application/json")
-			data, err := json.Marshal(resp)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			_, err = w.Write(data)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			return
-		}
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 }

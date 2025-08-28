@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/Valentin-Kaiser/go-core/apperror"
 	"github.com/Valentin-Kaiser/go-core/database"
@@ -9,6 +10,7 @@ import (
 	"github.com/Valentin-Kaiser/hdns/pkg/model"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func init() {
@@ -26,6 +28,15 @@ func init() {
 			"OPTIONS": func(context *Context) (interface{}, error) {
 				return nil, nil
 			},
+		})
+
+	RegisterEndpoint(
+		EndpointTransportWebsocket,
+		EndpointEncodingJSON,
+		[]string{
+			"/api/stream/record",
+		}, map[string]Handler{
+			"WS": streamRecord,
 		})
 
 	RegisterEndpoint(
@@ -74,6 +85,32 @@ func GetRecord(c *Context) (interface{}, error) {
 		return nil, apperror.NewError("failed to find records").AddError(err)
 	}
 	return records, nil
+}
+
+func streamRecord(c *Context) (interface{}, error) {
+	for {
+		_, _, err := c.conn.ReadMessage()
+		if err != nil {
+			return nil, nil
+		}
+
+		var records []model.Record
+		err = database.Execute(func(db *gorm.DB) error {
+			err := db.Preload(clause.Associations).Find(&records).Error
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, apperror.NewError("failed to get address").AddError(err)
+		}
+
+		err = c.conn.WriteJSON(records)
+		if err != nil {
+			return nil, apperror.Wrap(err)
+		}
+	}
 }
 
 func CreateRecord(c *Context) (interface{}, error) {

@@ -16,19 +16,19 @@ type ServerConfig struct {
 }
 
 type ServiceConfig struct {
-	LogLevel  int8   `usage:"(0 = debug, 1 = info, 2 = warn, 3 = error, 4 = fatal, 5 = panic)" json:"log_level"`
-	WebPort   uint16 `usage:"Port of the web server to listen on" json:"web_port"`
-	Refresh   string `usage:"Refresh interval in cron format (e.g. @every minute)" json:"refresh_interval"`
-	DNSServer string `usage:"DNS server to use for lookups, e.g. 9.9.9.9:53" json:"dns_server"`
+	LogLevel   int8     `usage:"(0 = debug, 1 = info, 2 = warn, 3 = error, 4 = fatal, 5 = panic)" json:"log_level"`
+	WebPort    uint16   `usage:"Port of the web server to listen on" json:"web_port"`
+	Refresh    string   `usage:"Refresh interval in cron format (e.g. @every minute)" json:"refresh_interval"`
+	DNSServers []string `usage:"DNS servers to use for lookups, e.g. [\"9.9.9.9:53\", \"1.1.1.1:53\"]" json:"dns_servers"`
 }
 
 func Init() {
 	defaultConfig := &ServerConfig{
 		Service: ServiceConfig{
-			LogLevel:  1,
-			WebPort:   8080,
-			Refresh:   "*/30 * * * * *", // every 30 seconds
-			DNSServer: "9.9.9.9:53",     // DNS server for lookups
+			LogLevel:   1,
+			WebPort:    8080,
+			Refresh:    "@every 5m",
+			DNSServers: []string{"9.9.9.9:53", "1.1.1.1:53", "8.8.8.8:53"},
 		},
 		Database: database.Config{
 			Driver:   "sqlite",
@@ -83,18 +83,23 @@ func watch() {
 	})
 }
 
-func OnChange(f func(*ServerConfig) error) {
-	config.OnChange(func(c config.Config) error {
-		if c == nil {
+func OnChange(f func(o *ServerConfig, n *ServerConfig) error) {
+	config.OnChange(func(o config.Config, n config.Config) error {
+		if o == nil || n == nil {
 			return apperror.NewError("the configuration provided is nil")
 		}
 
-		bc, ok := c.(*ServerConfig)
+		oc, ok := o.(*ServerConfig)
 		if !ok {
 			return apperror.NewError("the configuration provided is not a BackendConfig")
 		}
 
-		return f(bc)
+		nc, ok := n.(*ServerConfig)
+		if !ok {
+			return apperror.NewError("the configuration provided is not a BackendConfig")
+		}
+
+		return f(oc, nc)
 	})
 }
 
@@ -122,6 +127,16 @@ func (c ServiceConfig) Validate() error {
 	_, err := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor).Parse(c.Refresh)
 	if err != nil {
 		return apperror.NewError("invalid cron format for refresh interval").AddError(err)
+	}
+
+	if len(c.DNSServers) == 0 {
+		return apperror.NewError("at least one DNS server is required")
+	}
+
+	for _, server := range c.DNSServers {
+		if server == "" {
+			return apperror.NewError("DNS server cannot be empty")
+		}
 	}
 
 	return nil
