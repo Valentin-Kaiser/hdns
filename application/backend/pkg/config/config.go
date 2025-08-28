@@ -83,18 +83,23 @@ func watch() {
 	})
 }
 
-func OnChange(f func(*ServerConfig) error) {
-	config.OnChange(func(c config.Config) error {
-		if c == nil {
+func OnChange(f func(o *ServerConfig, n *ServerConfig) error) {
+	config.OnChange(func(o config.Config, n config.Config) error {
+		if o == nil || n == nil {
 			return apperror.NewError("the configuration provided is nil")
 		}
 
-		bc, ok := c.(*ServerConfig)
+		oc, ok := o.(*ServerConfig)
 		if !ok {
 			return apperror.NewError("the configuration provided is not a BackendConfig")
 		}
 
-		return f(bc)
+		nc, ok := n.(*ServerConfig)
+		if !ok {
+			return apperror.NewError("the configuration provided is not a BackendConfig")
+		}
+
+		return f(oc, nc)
 	})
 }
 

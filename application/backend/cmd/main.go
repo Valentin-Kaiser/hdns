@@ -28,14 +28,22 @@ func init() {
 
 	config.Init()
 	zlog.Logger().WithConsole().WithLogFile().Init("hdns", zerolog.Level(config.Get().Service.LogLevel))
-	config.OnChange(func(c *config.ServerConfig) error {
-		zlog.Logger().SetLevel(zerolog.Level(c.Service.LogLevel))
-		database.Reconnect()
-		err := web.Instance().Restart()
-		if err != nil {
-			log.Error().Err(err).Msg("[Service] web server failed to restart")
+	config.OnChange(func(o *config.ServerConfig, n *config.ServerConfig) error {
+		if o.Service.LogLevel != n.Service.LogLevel {
+			zlog.Logger().SetLevel(zerolog.Level(n.Service.LogLevel))
 		}
-		dns.Restart()
+		if o.Database.Changed(&n.Database) {
+			database.Reconnect()
+		}
+		if o.Service.WebPort != n.Service.WebPort {
+			err := web.Instance().Restart()
+			if err != nil {
+				log.Error().Err(err).Msg("[Service] web server failed to restart")
+			}
+		}
+		if o.Service.Refresh != n.Service.Refresh {
+			dns.Restart()
+		}
 		return nil
 	})
 }
