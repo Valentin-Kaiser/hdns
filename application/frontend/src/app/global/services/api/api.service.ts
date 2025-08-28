@@ -5,7 +5,7 @@ import { catchError, Observable, tap, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
 import { LoggerService } from "../logger/logger.service";
 import { NotifyService } from "../notify/notify.service";
-import { Address, Zone as DnsZone, Record } from "./model/object";
+import { Address, Zone as DnsZone, Record, Resolution } from "./model/object";
 
 @Injectable({
     providedIn: 'root',
@@ -44,18 +44,6 @@ export class ApiService {
 
     public clearHistory(): Observable<any> {
         return this.delete("object/history");
-    }
-
-    public recordHistory(): Observable<any[]> {
-        return this.get("object/record/history");
-    }
-
-    public recordHistoryByID(recordId: number): Observable<any[]> {
-        return this.get(`object/record/${recordId}/history`);
-    }
-
-    public clearRecordHistory(): Observable<any> {
-        return this.delete("object/record/history");
     }
 
     public refreshRecord(id: number): Observable<Record> {
@@ -98,6 +86,10 @@ export class ApiService {
         return this.get("object/log");
     }
 
+    public resolveRecord(recordId: number): Observable<Resolution[]> {
+        return this.get(`action/resolve/${recordId}`);
+    }
+
     /**
      * Generic API call methods
      */
@@ -106,10 +98,10 @@ export class ApiService {
         this.logger.info(`${this.logType} ${this.logName} GET request to ${this.baseURL}${endpoint}`);
         return this.http.get(this.baseURL + endpoint, { params }).pipe(
             tap((response) => {
-                this.logger.info(`${this.logType} ${this.logName} GET request successful:`, response);
+                this.logger.info(`${this.logType} ${this.logName} ${endpoint} GET request successful:`, response);
             }),
             catchError((response) => {
-                this.logger.error(`${this.logType} ${this.logName} GET request error:`, response);
+                this.logger.error(`${this.logType} ${this.logName} ${endpoint} GET request error:`, response);
                 return throwError(() => response?.error?.message);
             }));
     }
@@ -118,10 +110,10 @@ export class ApiService {
         this.logger.info(`${this.logType} ${this.logName} POST request to ${this.baseURL}${endpoint}`);
         return this.http.post(this.baseURL + endpoint, body).pipe(
             tap((response) => {
-                this.logger.info(`${this.logType} ${this.logName} POST request successful:`, response);
+                this.logger.info(`${this.logType} ${this.logName} ${endpoint} POST request successful:`, response);
             }),
             catchError((response) => {
-                this.logger.error(`${this.logType} ${this.logName} POST request error:`, response);
+                this.logger.error(`${this.logType} ${this.logName} ${endpoint} POST request error:`, response);
                 return throwError(() => response?.error?.message);
             }));
     }
@@ -130,10 +122,10 @@ export class ApiService {
         this.logger.info(`${this.logType} ${this.logName} PUT request to ${this.baseURL}${endpoint}`);
         return this.http.put(this.baseURL + endpoint, body).pipe(
             tap((response) => {
-                this.logger.info(`${this.logType} ${this.logName} PUT request successful:`, response);
+                this.logger.info(`${this.logType} ${this.logName} ${endpoint} PUT request successful:`, response);
             }),
             catchError((response) => {
-                this.logger.error(`${this.logType} ${this.logName} PUT request error:`, response);
+                this.logger.error(`${this.logType} ${this.logName} ${endpoint} PUT request error:`, response);
                 return throwError(() => response?.error?.message);
             }));
     }
@@ -142,10 +134,10 @@ export class ApiService {
         this.logger.info(`${this.logType} ${this.logName} DELETE request to ${this.baseURL}${endpoint}`);
         return this.http.delete(this.baseURL + endpoint).pipe(
             tap((response) => {
-                this.logger.info(`${this.logType} ${this.logName} DELETE request successful:`, response);
+                this.logger.info(`${this.logType} ${this.logName} ${endpoint} DELETE request successful:`, response);
             }),
             catchError((response) => {
-                this.logger.error(`${this.logType} ${this.logName} DELETE request error:`, response);
+                this.logger.error(`${this.logType} ${this.logName} ${endpoint} DELETE request error:`, response);
                 return throwError(() => response?.error?.message);
             }));
     }

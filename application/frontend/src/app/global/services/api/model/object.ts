@@ -49,5 +49,12 @@ export interface Config {
     log_level: number;
     web_port: number;
     refresh_interval: string;
-    dns_server: string;
+    dns_servers: string[];
+}
+
+export interface Resolution {
+    server: string;
+    addresses: string[];
+    response_time: number;
+    error: string | null;
 }
