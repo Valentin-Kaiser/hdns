@@ -44,13 +44,14 @@ export class ConfigurationComponent implements OnInit, OnChanges {
   }
 
   private loadConfig() {
-    this.apiService.getConfig().subscribe({
+    this.apiService.config().subscribe({
       next: (config: Config) => {
         this.config = { ...config };
         this.formGroup = this.formBuilder.group({
           log_level: [this.config.log_level],
           web_port: [this.config.web_port],
           refresh_interval: [this.config.refresh_interval],
+          dns_servers: [],
         });
       },
       error: (error) => {
@@ -92,21 +93,30 @@ export class ConfigurationComponent implements OnInit, OnChanges {
       this.config.dns_servers = [];
     }
     this.config.dns_servers.push('');
-    this.formGroup.markAsDirty();
+    this.dirty();
   }
 
   removeDnsServer(index: number) {
     if (this.config.dns_servers && this.config.dns_servers.length > 1) {
       this.config.dns_servers.splice(index, 1);
     }
-    this.formGroup.markAsDirty();
+    this.dirty();
   }
 
   updateDnsServer(index: number, value) {
     if (this.config.dns_servers && this.config.dns_servers.length > index) {
       this.config.dns_servers[index] = value;
     }
+    this.dirty();
+  }
+
+  dirty() {
     this.formGroup.markAsDirty();
+    if (this.config.dns_servers.some(s => !s || s.trim() === '')) {
+      this.formGroup.controls['dns_servers'].setErrors({ invalid: true });
+    } else {
+      this.formGroup.controls['dns_servers'].setErrors(null);
+    }
   }
 
   trackByIndex(index: number, item: any): number {

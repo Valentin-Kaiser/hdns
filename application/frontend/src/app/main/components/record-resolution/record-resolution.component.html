@@ -19,12 +19,12 @@
         </div>
 
         <!-- Record Info -->
-        <div *ngIf="!isLoadingRecordIps && selectedRecord" class="record-info">
+        <div *ngIf="!isLoadingRecordIps && record" class="record-info">
           <div class="record-details">
             <div class="record-name">
               <ion-icon name="link-outline"></ion-icon>
-              <span class="name-text">{{ selectedRecord.name }}.{{ selectedRecord.domain }}</span>
-              <ion-chip class="record-type-chip">{{ selectedRecord.type }}</ion-chip>
+              <span class="name-text">{{ record.name }}.{{ record.domain }}</span>
+              <ion-chip class="record-type-chip">{{ record.type }}</ion-chip>
             </div>
           </div>
         </div>
@@ -38,14 +38,6 @@
 
         <!-- IP Addresses List -->
         <div *ngIf="!isLoadingRecordIps && resolutions.length > 0" class="resolved-ips-list">
-          <div class="list-header">
-            <h5>Resolved IP Addresses ({{ resolutions.length }})</h5>
-            <ion-button fill="outline" size="small" (click)="refreshResolution()" [disabled]="isLoadingRecordIps">
-              <ion-icon name="refresh-outline" slot="start"></ion-icon>
-              Refresh
-            </ion-button>
-          </div>
-
           <ion-grid>
             <ion-row>
               <ion-col size="6" *ngFor="let res of resolutions;">

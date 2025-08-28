@@ -39,7 +39,7 @@ export class LogComponent implements OnInit, OnChanges {
   }
 
   private loadLogs() {
-    this.apiService.getLog().subscribe({
+    this.apiService.log().subscribe({
       next: (logs: string) => {
         this.logs = logs || 'No logs available';
         this.logsRefreshed.emit(this.logs);
@@ -54,7 +54,7 @@ export class LogComponent implements OnInit, OnChanges {
   }
 
   refreshLogs() {
-    this.apiService.getLog().subscribe({
+    this.apiService.log().subscribe({
       next: (logs: string) => {
         this.logs = logs || 'No logs available';
         this.logsRefreshed.emit(this.logs);

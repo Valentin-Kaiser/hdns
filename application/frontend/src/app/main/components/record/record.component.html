@@ -27,8 +27,8 @@
           class="action-btn">
           <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
         </ion-button>
-        <ion-button size="small" fill="clear" color="warning" (click)="onEditRecord(r)"
-          title="Edit Record" class="action-btn">
+        <ion-button size="small" fill="clear" color="warning" (click)="onEditRecord(r)" title="Edit Record"
+          class="action-btn">
           <ion-icon name="create-outline" slot="icon-only"></ion-icon>
         </ion-button>
         <ion-button size="small" fill="clear" color="danger" (click)="onDeleteRecord(r)" title="Delete Record"
@@ -63,11 +63,13 @@
             <span class="detail-value">Never</span>
             }
           </div>
+          @if (r.ttl) {
           <div class="detail-item">
             <ion-icon name="timer-outline"></ion-icon>
             <span class="detail-label">TTL:</span>
             <span class="detail-value">{{ r.ttl }}s</span>
           </div>
+          }
         </div>
       </ion-card-content>
     </ion-card>

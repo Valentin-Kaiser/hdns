@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
-import { Subscription, timer } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ApiService } from '../global/services/api/api.service';
 import { Address, Config, Record } from '../global/services/api/model/object';
 import { NotifyService } from '../global/services/notify/notify.service';
@@ -10,7 +10,7 @@ import { ConfigurationComponent } from './components/configuration/configuration
 import { IpHistoryComponent } from './components/ip-history/ip-history.component';
 import { LogComponent } from './components/log/log.component';
 import { RecordFormComponent } from './components/record-form/record-form.component';
-import { RecordIpsComponent } from './components/record-ips/record-ips.component';
+import { RecordResolutionComponent } from './components/record-resolution/record-resolution.component';
 import { RecordComponent } from './components/record/record.component';
 
 @Component({
@@ -27,7 +27,7 @@ import { RecordComponent } from './components/record/record.component';
     LogComponent,
     RecordComponent,
     IpHistoryComponent,
-    RecordIpsComponent
+    RecordResolutionComponent
   ]
 })
 export class MainPage implements OnInit, OnDestroy {
@@ -36,31 +36,21 @@ export class MainPage implements OnInit, OnDestroy {
   records: Record[] = [];
   record: Record | null = null;
   isLoading = true;
-  isRefreshing = false;
 
-  // Configuration and logs states
   showConfig = false;
   showLogs = false;
   config: Config = null;
-  originalConfig: Config | null = null;
   isLoadingConfig = false;
   isSavingConfig = false;
 
-  logs = '';
-  isLoadingLogs = false;
-  isRefreshingLogs = false;
-
-  // IP History and Record IPs states
-  showIpHistory = false;
-  isLoadingHistory = false;
-  showRecordIps = false;
+  showHistory = false;
+  showRecordResolution = false;
   selectedRecord: Record | null = null;
-  isLoadingRecordIps = false;
 
-  private autoRefreshSubscription?: Subscription;
+  subscriptions: Subscription[] = [];
 
   get hasActiveModal(): boolean {
-    return !!(this.record || this.showConfig || this.showLogs || this.showIpHistory || this.showRecordIps);
+    return !!(this.record || this.showConfig || this.showLogs || this.showHistory || this.showRecordResolution);
   }
 
   constructor(
@@ -70,84 +60,37 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.loadInitialData();
-    this.startAutoRefresh();
+    const addressStream = this.apiService.address();
+    this.subscriptions.push(addressStream.messages$.subscribe({
+      next: (message) => {
+        this.current = message;
+      },
+      error: (error) => {
+        console.error('Address stream error:', error);
+      }
+    }));
+
+    const recordStream = this.apiService.records();
+    this.subscriptions.push(recordStream.messages$.subscribe({
+      next: (message) => {
+        this.records = message;
+      },
+      error: (error) => {
+        console.error('Record stream error:', error);
+      }
+    }));
+
+    recordStream.send(null);
+    addressStream.send(null);
+
+    setInterval(() => {
+      addressStream.send(null);
+      recordStream.send(null);
+    }, 2000);
   }
 
   ngOnDestroy() {
-    if (this.autoRefreshSubscription) {
-      this.autoRefreshSubscription.unsubscribe();
-    }
-  }
-
-  private loadInitialData() {
-    this.isLoading = true;
-
-    // Load current address and records in parallel
-    Promise.all([
-      this.apiService.address().toPromise(),
-      this.apiService.records().toPromise()
-    ]).then(([address, records]) => {
-      this.current = address || null;
-      this.records = records || [];
-    }).catch(error => {
-      console.error('Error loading initial data:', error);
-      this.notifyService.presentErrorToast("Failed to load records", error);
-    }).finally(() => {
-      this.isLoading = false;
-    });
-  }
-
-  private startAutoRefresh() {
-    // Auto-refresh every 5 minutes
-    this.autoRefreshSubscription = timer(0, 5 * 60 * 1000).subscribe(() => {
-      if (!this.isRefreshing && !this.isLoading) {
-        this.silentRefresh();
-      }
-    });
-  }
-
-  private silentRefresh() {
-    this.apiService.address().subscribe({
-      next: (address) => {
-        this.current = address;
-      },
-      error: (error) => {
-        console.error('Silent refresh failed:', error);
-      }
-    });
-  }
-
-  refresh() {
-    if (this.isRefreshing) return;
-
-    this.isRefreshing = true;
-
-    Promise.all([
-      this.apiService.refreshAddress().toPromise(),
-      this.apiService.records().toPromise()
-    ]).then(([address, records]) => {
-      this.current = address || null;
-      this.records = records || [];
-      this.notifyService.presentToast("Data refreshed successfully");
-    }).catch(error => {
-      console.error('Refresh error:', error);
-      this.notifyService.presentErrorToast("Failed to refresh data", error);
-    }).finally(() => {
-      this.isRefreshing = false;
-    });
-  }
-
-  loadRecords() {
-    this.apiService.records().subscribe({
-      next: (response) => {
-        this.records = response || [];
-      },
-      error: (error) => {
-        console.error('Error loading records:', error);
-        this.notifyService.presentErrorToast("Failed to load records", error);
-      }
-    });
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   addRecord() {
@@ -178,11 +121,6 @@ export class MainPage implements OnInit, OnDestroy {
 
   onConfigSaved(updatedConfig: Config) {
     this.config = { ...updatedConfig };
-    this.originalConfig = { ...updatedConfig };
-  }
-
-  onLogsRefreshed(refreshedLogs: string) {
-    this.logs = refreshedLogs;
   }
 
   closeActiveForm() {
@@ -192,15 +130,15 @@ export class MainPage implements OnInit, OnDestroy {
       this.toggleConfig();
     } else if (this.showLogs) {
       this.toggleLogs();
-    } else if (this.showIpHistory) {
+    } else if (this.showHistory) {
       this.toggleIpHistory();
-    } else if (this.showRecordIps) {
+    } else if (this.showRecordResolution) {
       this.closeRecordIps();
     }
   }
 
   refreshRecord(record: Record) {
-    this.apiService.refreshRecord(record.id).subscribe({
+    this.apiService.refresh(record.id).subscribe({
       next: (updatedRecord) => {
         const index = this.records.findIndex(r => r.id === record.id);
         if (index !== -1 && updatedRecord) {
@@ -264,25 +202,25 @@ export class MainPage implements OnInit, OnDestroy {
 
   // IP History methods
   toggleIpHistory() {
-    this.showIpHistory = !this.showIpHistory;
-    if (this.showIpHistory) {
+    this.showHistory = !this.showHistory;
+    if (this.showHistory) {
       this.showConfig = false;
       this.showLogs = false;
-      this.showRecordIps = false;
+      this.showRecordResolution = false;
     }
   }
 
   // Record IPs methods
   showRecordIpsFor(record: Record) {
     this.selectedRecord = record;
-    this.showRecordIps = true;
+    this.showRecordResolution = true;
     this.showConfig = false;
     this.showLogs = false;
-    this.showIpHistory = false;
+    this.showHistory = false;
   }
 
   closeRecordIps() {
-    this.showRecordIps = false;
+    this.showRecordResolution = false;
     this.selectedRecord = null;
   }
 }

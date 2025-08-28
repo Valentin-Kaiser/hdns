@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { Subscription } from 'rxjs/internal/Subscription';
 import { ApiService } from '../../../global/services/api/api.service';
 import { Record, Resolution } from '../../../global/services/api/model/object';
 import { NotifyService } from '../../../global/services/notify/notify.service';
@@ -30,20 +31,20 @@ interface ResolutionStats {
 }
 
 @Component({
-  selector: 'app-record-ips',
-  templateUrl: './record-ips.component.html',
-  styleUrls: ['./record-ips.component.scss'],
+  selector: 'app-record-resolution',
+  templateUrl: './record-resolution.component.html',
+  styleUrls: ['./record-resolution.component.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
-export class RecordIpsComponent implements OnInit, OnChanges {
-  @Input() showRecordIps = false;
-  @Input() selectedRecord: Record | null = null;
+export class RecordResolutionComponent implements OnInit, OnDestroy {
+  @Input() record: Record | null = null;
   @Input() isLoadingRecordIps = false;
 
   @Output() closed = new EventEmitter<void>();
 
   resolutions: Resolution[] = [];
+  private sub: Subscription | null = null;
 
   constructor(
     private apiService: ApiService,
@@ -51,36 +52,26 @@ export class RecordIpsComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
-    if (this.showRecordIps && this.selectedRecord) {
-      this.resolveRecord();
+    if (this.record) {
+      const addressStream = this.apiService.resolve(this.record);
+      this.sub = addressStream.messages$.subscribe({
+        next: (message) => {
+          this.resolutions = message;
+        },
+        error: (error) => {
+          console.error('Address stream error:', error);
+        }
+      });
+
+      addressStream.send(null);
+      setInterval(() => {
+        addressStream.send(null);
+      }, 5000);
     }
   }
 
-  ngOnChanges() {
-    if (this.showRecordIps && this.selectedRecord && this.resolutions.length === 0) {
-      this.resolveRecord();
-    }
-  }
-
-  private resolveRecord() {
-    if (!this.selectedRecord) return;
-
-    // Use the real API to resolve the record
-    this.apiService.resolveRecord(this.selectedRecord.id).subscribe({
-      next: (response) => {
-        this.resolutions = response || [];
-      },
-      error: (error) => {
-        console.error('DNS resolution failed:', error);
-        this.notifyService.presentErrorToast('DNS Error', 'Failed to resolve DNS record');
-        this.resolutions = [];
-      }
-    });
-  }
-
-  refreshResolution() {
-    this.resolutions = [];
-    this.resolveRecord();
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
   }
 
   getIpTypeIcon(ip: string): string {

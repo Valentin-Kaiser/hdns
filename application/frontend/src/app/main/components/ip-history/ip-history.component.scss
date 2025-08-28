@@ -82,7 +82,7 @@
 
       .ip-history-item {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
         padding: 12px;
         border-radius: 8px;
@@ -124,18 +124,6 @@
               font-family: 'Courier New', Monaco, monospace;
               font-weight: 500;
             }
-
-            ion-chip {
-              --background: var(--ion-color-primary);
-              --color: var(--ion-color-primary-contrast);
-              height: 20px;
-              font-size: 10px;
-            }
-          }
-
-          .timestamp {
-            font-size: 12px;
-            color: var(--ion-color-step-600);
           }
 
           .ip-metadata {
@@ -144,21 +132,20 @@
             gap: 12px;
             font-size: 12px;
             color: var(--ion-color-step-600);
+            margin-left: 26px; // Align with IP text (icon width + gap)
 
             .timestamp {
               font-weight: 500;
             }
-
-            .location {
-              display: flex;
-              align-items: center;
-              gap: 4px;
-
-              ion-icon {
-                font-size: 12px;
-              }
-            }
           }
+        }
+
+        .current-chip {
+          --background: var(--ion-color-primary);
+          --color: var(--ion-color-primary-contrast);
+          height: 20px;
+          font-size: 10px;
+          margin-top: 2px; // Slight top margin for better alignment
         }
 
         ion-button {

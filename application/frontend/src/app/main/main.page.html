@@ -19,9 +19,6 @@
         [disabled]="record">
         <ion-icon name="settings-outline"></ion-icon>
       </ion-button>
-      <ion-button fill="clear" (click)="refresh()" [disabled]="isRefreshing">
-        <ion-icon name="refresh-outline" [class.spin]="isRefreshing"></ion-icon>
-      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -42,30 +39,27 @@
 
     <!-- Configuration Section -->
     @if (showConfig) {
-    <app-configuration [isLoadingConfig]="isLoadingConfig"
-      [isSavingConfig]="isSavingConfig" (closed)="toggleConfig()" (configSaved)="onConfigSaved($event); showConfig = false">
+    <app-configuration [isLoadingConfig]="isLoadingConfig" [isSavingConfig]="isSavingConfig" (closed)="toggleConfig()"
+      (configSaved)="onConfigSaved($event); showConfig = false">
     </app-configuration>
     }
 
     <!-- Logs Section -->
     @if (showLogs) {
-    <app-log [showLogs]="showLogs" [logs]="logs" [isLoadingLogs]="isLoadingLogs" [isRefreshingLogs]="isRefreshingLogs"
-      (closed)="toggleLogs()" (logsRefreshed)="onLogsRefreshed($event)">
+    <app-log (closed)="toggleLogs()">
     </app-log>
     }
 
     <!-- IP History Section -->
-    @if (showIpHistory) {
-    <app-ip-history [showHistory]="showIpHistory" [currentAddressId]="current?.id" [isLoadingHistory]="isLoadingHistory"
-      (closed)="toggleIpHistory()">
+    @if (showHistory) {
+    <app-ip-history [currentAddressId]="current?.id" (closed)="toggleIpHistory()">
     </app-ip-history>
     }
 
     <!-- Record IPs Section -->
-    @if (showRecordIps) {
-    <app-record-ips [showRecordIps]="showRecordIps" [selectedRecord]="selectedRecord"
-      [isLoadingRecordIps]="isLoadingRecordIps" (closed)="closeRecordIps()">
-    </app-record-ips>
+    @if (showRecordResolution) {
+    <app-record-resolution [record]="selectedRecord" (closed)="closeRecordIps()">
+    </app-record-resolution>
     }
 
     @if (!hasActiveModal) {

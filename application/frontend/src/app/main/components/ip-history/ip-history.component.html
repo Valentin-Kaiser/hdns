@@ -26,16 +26,16 @@
               <div class="ip-address">
                 <ion-icon name="globe-outline" [color]="address.id === currentAddressId ? 'primary' : 'medium'"></ion-icon>
                 <span class="ip-text">{{ address.ip }}</span>
-                <div class="ip-metadata">
-                  <p class="timestamp">{{ address.created_at | date:'HH:mm dd.MM.yyyy' }}</p>
-                </div>
-                @if (address.id === currentAddressId) {
-                <ion-chip color="primary" size="small" slot="end">
-                  <ion-label>Current</ion-label>
-                </ion-chip>
-                }
+              </div>
+              <div class="ip-metadata">
+                <span class="timestamp">{{ address.created_at | date:'HH:mm dd.MM.yyyy' }}</span>
               </div>
             </div>
+            @if (address.id === currentAddressId) {
+            <ion-chip color="primary" size="small" class="current-chip">
+              <ion-label>Current</ion-label>
+            </ion-chip>
+            }
           </div>
           }
         </div>
