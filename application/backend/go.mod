@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.34.0
-	gorm.io/gorm v1.30.1
+	gorm.io/gorm v1.30.2
 )
 
 require (
