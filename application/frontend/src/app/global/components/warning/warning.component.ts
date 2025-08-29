@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { LoggerService } from '../../services/logger/logger.service';
@@ -11,10 +12,10 @@ import { LoggerService } from '../../services/logger/logger.service';
   imports: [
     CommonModule,
     IonicModule,
+    FormsModule,
   ]
 })
 export class WarningComponent implements OnInit, OnChanges {
-
   logType = "[Component]";
   logName = "[WarningDialogue]";
 
@@ -34,6 +35,13 @@ export class WarningComponent implements OnInit, OnChanges {
   @Input() rightButtonLabel?: string = "Cancel";
   @Input() rightButtonColor?: string = "danger";
 
+  @Input() showCheckbox: boolean = false;
+  @Input() checkboxLabel: string = '';
+  @Input() checkboxValue: boolean = false;
+  @Input() checkboxChange?: (checked: boolean) => void;
+
+  checkboxChecked: boolean = false;
+
   /**
    * An optional parameter of any type, that will be supplied to the callback
    */
@@ -49,9 +57,10 @@ export class WarningComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
-    this.safeMessage = this.getAsHTML(this.message.trim());
-    this.safeHint = this.getAsHTML(this.hint.trim());
-    this.logger.debug(`${this.logType}${this.logName} Component initialized with message: ${this.message}`);
+  this.safeMessage = this.getAsHTML(this.message.trim());
+  this.safeHint = this.getAsHTML(this.hint.trim());
+  this.checkboxChecked = this.checkboxValue;
+  this.logger.debug(`${this.logType}${this.logName} Component initialized with message: ${this.message}`);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -59,12 +68,19 @@ export class WarningComponent implements OnInit, OnChanges {
       this.safeMessage = this.getAsHTML(this.message.trim());
       this.safeHint = this.getAsHTML(this.hint.trim());
     }
+    if (changes['checkboxValue'] && changes['checkboxValue'].currentValue !== changes['checkboxValue'].previousValue) {
+      this.checkboxChecked = changes['checkboxValue'].currentValue;
+    }
   }
 
   doOnLeft() {
     this.modalController.dismiss().then(() => {
       if (this.leftButtonAction) {
-        this.leftButtonAction.call(this.reference, this.param);
+        // Pass checkboxChecked as second param for generic use
+        this.leftButtonAction.call(this.reference, this.param, this.checkboxChecked);
+      }
+      if (this.checkboxChange) {
+        this.checkboxChange(this.checkboxChecked);
       }
     });
   }

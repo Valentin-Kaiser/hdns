@@ -77,8 +77,8 @@ export class ApiService {
         return this.put(`object/record`, record);
     }
 
-    public deleteRecord(record: Record): Observable<any> {
-        return this.delete(`object/record/${record.id}`);
+    public deleteRecord(record: Record, delete_from_hetzner: boolean): Observable<any> {
+        return this.delete(`object/record/${record.id}?delete_from_hetzner=${delete_from_hetzner}`);
     }
 
     public updateConfig(config: any): Observable<any> {

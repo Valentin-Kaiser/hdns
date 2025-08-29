@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Subscription } from 'rxjs';
-import { ApiService } from '../global/services/api/api.service';
+import { ApiService, Stream } from '../global/services/api/api.service';
 import { Address, Record } from '../global/services/api/model/object';
 import { NotifyService } from '../global/services/notify/notify.service';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
@@ -43,6 +43,7 @@ export class MainPage implements OnInit, OnDestroy {
   showRecordResolution = false;
   selectedRecord: Record | null = null;
 
+  streams: Stream<any, any>[] = [];
   subscriptions: Subscription[] = [];
   interval = null;
 
@@ -79,18 +80,19 @@ export class MainPage implements OnInit, OnDestroy {
       }
     }));
 
-    recordStream.send(null);
-    addressStream.send(null);
+    this.streams.push(recordStream);
+    this.streams.push(addressStream);
 
+    this.streams.forEach(s => s.send(null));
     this.interval = setInterval(() => {
-      addressStream.send(null);
-      recordStream.send(null);
+      this.streams.forEach(s => s.send(null));
     }, 10000);
   }
 
   ngOnDestroy() {
     this.interval && clearInterval(this.interval);
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.streams.forEach(s => s.close());
   }
 
   addRecord() {
@@ -145,12 +147,13 @@ export class MainPage implements OnInit, OnDestroy {
   }
 
   deleteRecord(record: Record) {
+    let deleteFromHetzner = false;
     this.notifyService.showWarning(
       this,
       `Are you sure you want to delete the record ${record.name}.${record.domain}?`,
       () => { },
       () => {
-        this.apiService.deleteRecord(record).subscribe({
+        this.apiService.deleteRecord(record, deleteFromHetzner).subscribe({
           next: () => {
             this.records = this.records.filter(r => r.id !== record.id);
             this.notifyService.presentToast(`Record ${record.name}.${record.domain} deleted`, 'Success');
@@ -168,7 +171,12 @@ export class MainPage implements OnInit, OnDestroy {
       "Delete",
       "medium",
       "danger",
-      "This will not delete the record from the Hetzner DNS"
+      true,
+      "Delete record from Hetzner DNS",
+      false,
+      (value: boolean) => {
+        deleteFromHetzner = value;
+      }
     )
   }
 

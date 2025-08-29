@@ -186,7 +186,24 @@ func DeleteRecord(c *Context) (interface{}, error) {
 		return nil, apperror.NewError("record ID is required")
 	}
 
+	var record model.Record
 	err := database.Execute(func(db *gorm.DB) error {
+		return db.First(&record, id).Error
+	})
+	if err != nil {
+		return nil, apperror.NewError("failed to find record").AddError(err)
+	}
+
+	// Get the query parameter if the record should be deleted from Hetzner
+	deleteFromHetzner := c.req.URL.Query().Get("delete_from_hetzner")
+	if deleteFromHetzner == "true" {
+		err := dns.DeleteRecord(&record)
+		if err != nil {
+			return nil, apperror.Wrap(err)
+		}
+	}
+
+	err = database.Execute(func(db *gorm.DB) error {
 		return db.Delete(&model.Record{}, id).Error
 	})
 	if err != nil {

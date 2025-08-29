@@ -88,6 +88,18 @@ func FetchZones(token string) ([]Zone, error) {
 	return res.Zones, nil
 }
 
+func DeleteRecord(r *model.Record) error {
+	c := &client{APIToken: r.Token.String()}
+	rec, found, err := c.findRecord(r)
+	if err != nil {
+		return apperror.Wrap(err)
+	}
+	if !found {
+		return apperror.NewError("record not found")
+	}
+	return c.deleteRecord(rec.ID)
+}
+
 func updateHetzner(r *model.Record, ip string) error {
 	c := &client{APIToken: r.Token.String()}
 	rec, found, err := c.findRecord(r)
@@ -147,6 +159,15 @@ func (c *client) createRecord(record *Record) error {
 		return err
 	}
 	return c.handleAPIResponse(body, "create")
+}
+
+func (c *client) deleteRecord(recordID string) error {
+	url := hetznerBaseURL + "/records/" + recordID
+	body, err := c.fetch(http.MethodDelete, url, nil)
+	if err != nil {
+		return apperror.NewError("deleting the record failed").AddError(err)
+	}
+	return c.handleAPIResponse(body, "delete")
 }
 
 func (c *client) findRecord(r *model.Record) (*Record, bool, error) {
@@ -214,13 +235,15 @@ func (c *client) validateRecord(r *Record) error {
 }
 
 func (c *client) handleAPIResponse(body []byte, action string) error {
-	var r Record
+	var r struct {
+		Error map[string]interface{} `json:"error"`
+	}
 	err := json.Unmarshal(body, &r)
 	if err != nil {
 		return apperror.NewErrorf("unmarshal response for %s action failed", action).AddError(err)
 	}
-	if r.Error != "" {
-		return apperror.NewError("API error occured").AddError(apperror.NewError(r.Error))
+	if len(r.Error) > 0 {
+		return apperror.NewError("API error occured").AddError(apperror.NewErrorf("%v", r.Error))
 	}
 	return nil
 }
