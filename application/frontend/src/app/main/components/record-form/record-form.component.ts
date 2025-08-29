@@ -25,7 +25,6 @@ export class RecordFormComponent implements OnInit, OnChanges {
   formSteps = {
     token: false,
     zoneId: false,
-    type: false,
     name: false
   };
 
@@ -53,7 +52,6 @@ export class RecordFormComponent implements OnInit, OnChanges {
     if (!this.record) return;
     this.formSteps.token = !!(this.record.token && this.record.token.trim().length > 0);
     this.formSteps.zoneId = !!(this.record.zone_id && this.record.zone_id.trim().length > 0);
-    this.formSteps.type = !!(this.record.type);
     this.formSteps.name = !!(this.record.name && this.record.name.trim().length > 0);
   }
 

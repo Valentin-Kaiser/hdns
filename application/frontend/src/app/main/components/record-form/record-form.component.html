@@ -53,32 +53,11 @@
         </div>
         }
 
-        <!-- Step 3: Record Type -->
+        <!-- Step 3: Record Name -->
         @if (formSteps.zoneId) {
         <div class="form-step">
           <div class="step-label">
             <span class="step-number">3</span>
-            Record Type
-          </div>
-          <ion-item>
-            <ion-select placeholder="Select record type" [(ngModel)]="record.type" (ionChange)="onFormFieldChange()"
-              fill="outline" interface="popover">
-              <ion-select-option value="A">A - IPv4 Address</ion-select-option>
-              <ion-select-option value="AAAA">AAAA - IPv6 Address</ion-select-option>
-              <ion-select-option value="CNAME">CNAME - Canonical Name</ion-select-option>
-              <ion-select-option value="MX">MX - Mail Exchange</ion-select-option>
-              <ion-select-option value="TXT">TXT - Text Record</ion-select-option>
-              <ion-select-option value="NS">NS - Name Server</ion-select-option>
-            </ion-select>
-          </ion-item>
-        </div>
-        }
-
-        <!-- Step 4: Record Name -->
-        @if (formSteps.type) {
-        <div class="form-step">
-          <div class="step-label">
-            <span class="step-number">4</span>
             Record Name
           </div>
           <ion-item>
@@ -89,11 +68,11 @@
         </div>
         }
 
-        <!-- Step 5: TTL (optional) -->
+        <!-- Step 4: TTL (optional) -->
         @if (formSteps.name) {
         <div class="form-step">
           <div class="step-label">
-            <span class="step-number">5</span>
+            <span class="step-number">4</span>
             TTL - Time To Live (optional)
           </div>
           <ion-item>

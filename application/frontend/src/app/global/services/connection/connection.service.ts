@@ -96,7 +96,9 @@ export class ConnectionService implements OnDestroy {
 				this.logger.info(`${this.logType} ${this.logName} checkApiAvailability success`);
 				if (!this.connected.value) {
 					this.connected.next(true);
-					this.onConnectionEstablished();
+					if (this.onConnectionEstablished) {
+						this.onConnectionEstablished();
+					}
 				}
 			},
 			error: () => {

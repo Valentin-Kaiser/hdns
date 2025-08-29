@@ -40,10 +40,6 @@
       <ion-card-header>
         <ion-card-title>
           <span>{{ r.name }}.{{ r.domain }}</span>
-          <span class="record-type-badge" [style.background]="'var(--ion-color-' + getRecordTypeColor(r.type) + ')'"
-                    [style.color]="'var(--ion-color-' + getRecordTypeColor(r.type) + '-contrast)'">
-          {{ r.type }}
-          </span>
         </ion-card-title>
       </ion-card-header>
 

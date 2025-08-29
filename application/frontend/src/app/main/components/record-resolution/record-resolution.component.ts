@@ -53,28 +53,6 @@ export class RecordResolutionComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  getIpTypeIcon(ip: string): string {
-    return this.isIPv6(ip) ? 'globe-outline' : 'earth-outline';
-  }
-
-  getIpTypeColor(ip: string): string {
-    return this.isIPv6(ip) ? 'secondary' : 'primary';
-  }
-
-  getIpType(ip: string): string {
-    return this.isIPv6(ip) ? 'IPv6' : 'IPv4';
-  }
-
-  isIPv4(ip: string): boolean {
-    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    return ipv4Regex.test(ip);
-  }
-
-  isIPv6(ip: string): boolean {
-    const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/;
-    return ipv6Regex.test(ip) || ip.includes('::');
-  }
-
   getFormattedDate(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();

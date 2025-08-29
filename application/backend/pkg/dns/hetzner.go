@@ -97,7 +97,7 @@ func updateHetzner(r *model.Record, ip string) error {
 	if !found {
 		newRecord := &Record{
 			ZoneID: r.ZoneID,
-			Type:   string(r.Type),
+			Type:   "A",
 			Name:   r.Name,
 			TTL:    r.TTL,
 			Value:  ip,
@@ -150,7 +150,7 @@ func (c *client) createRecord(record *Record) error {
 }
 
 func (c *client) findRecord(r *model.Record) (*Record, bool, error) {
-	url := fmt.Sprintf("%s?zone_id=%s&name=%s&type=%s", hetznerBaseURL+"/records", r.ZoneID, r.Name, r.Type)
+	url := fmt.Sprintf("%s?zone_id=%s&name=%s&type=A", hetznerBaseURL+"/records", r.ZoneID, r.Name)
 	body, err := c.fetch(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, false, err
@@ -207,6 +207,8 @@ func (c *client) validateRecord(r *Record) error {
 		return apperror.NewError("record name is required")
 	case r.Value == "":
 		return apperror.NewError("record value is required")
+	case !ValidateAddress(r.Value):
+		return apperror.NewError("record value is invalid")
 	}
 	return nil
 }

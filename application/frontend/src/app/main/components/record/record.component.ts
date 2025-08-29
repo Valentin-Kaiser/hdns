@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
-import { Address, Record, RecordType } from '../../../global/services/api/model/object';
+import { Address, Record } from '../../../global/services/api/model/object';
 
 @Component({
   selector: 'app-record',
@@ -23,24 +23,6 @@ export class RecordComponent {
 
   isRecordUpdated(record: Record): boolean {
     return record.address_id === this.current?.id;
-  }
-
-  getRecordTypeColor(type: RecordType): string {
-    switch (type) {
-      case RecordType.A:
-      case RecordType.AAAA:
-        return 'primary'; // Hetzner red
-      case RecordType.CNAME:
-        return 'secondary'; // Hetzner orange
-      case RecordType.MX:
-        return 'success'; // Green for mail
-      case RecordType.TXT:
-        return 'warning'; // Yellow/amber
-      case RecordType.NS:
-        return 'medium'; // Neutral gray
-      default:
-        return 'medium';
-    }
   }
 
   getLastUpdatedText(dateString: string): string {

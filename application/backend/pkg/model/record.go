@@ -14,39 +14,26 @@ import (
 	"github.com/Valentin-Kaiser/go-core/security"
 )
 
-type RecordType string
-
-const (
-	RecordTypeUnknown RecordType = ""
-	RecordTypeA       RecordType = "A"
-	RecordTypeAAAA    RecordType = "AAAA"
-	RecordTypeCNAME   RecordType = "CNAME"
-	RecordTypeMX      RecordType = "MX"
-	RecordTypeTXT     RecordType = "TXT"
-	RecordTypeNS      RecordType = "NS"
-)
-
 type Record struct {
 	BaseModel
-	Token      Token      `gorm:"uniqueIndex;not null" json:"token"`
-	ZoneID     string     `gorm:"not null" json:"zone_id"`
-	Type       RecordType `gorm:"not null" json:"type"`
-	Domain     string     `gorm:"not null" json:"domain"`
-	Name       string     `gorm:"not null" json:"name"`
-	TTL        uint32     `gorm:"not null" json:"ttl"`
-	AddressID  *uint64    `json:"address_id,omitempty"`
-	Address    *Address   `gorm:"foreignKey:AddressID" json:"address,omitempty"`
-	LastUpdate time.Time  `gorm:"not null" json:"last_update"`
+	Token      Token     `gorm:"uniqueIndex;not null" json:"token"`
+	ZoneID     string    `gorm:"not null" json:"zone_id"`
+	Domain     string    `gorm:"not null" json:"domain"`
+	Name       string    `gorm:"not null" json:"name"`
+	TTL        uint32    `gorm:"not null" json:"ttl"`
+	AddressID  *uint64   `json:"address_id,omitempty"`
+	Address    *Address  `gorm:"foreignKey:AddressID" json:"address,omitempty"`
+	LastUpdate time.Time `gorm:"not null" json:"last_update"`
 }
 
 type Token string
 
 func (r *Record) Validate() error {
+	if strings.TrimSpace(r.Token.String()) == "" {
+		return apperror.NewError("token is required")
+	}
 	if strings.TrimSpace(r.ZoneID) == "" {
 		return apperror.NewError("zone_id is required")
-	}
-	if strings.TrimSpace(string(r.Type)) == "" {
-		return apperror.NewError("type is required")
 	}
 	if strings.TrimSpace(r.Domain) == "" {
 		return apperror.NewError("domain is required")

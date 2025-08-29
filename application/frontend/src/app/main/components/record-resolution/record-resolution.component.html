@@ -24,7 +24,6 @@
             <div class="record-name">
               <ion-icon name="link-outline"></ion-icon>
               <span class="name-text">{{ record.name }}.{{ record.domain }}</span>
-              <ion-chip class="record-type-chip">{{ record.type }}</ion-chip>
             </div>
           </div>
         </div>
@@ -41,13 +40,8 @@
           <div class="ip-item" *ngFor="let res of resolutions;">
             <div class="ip-details">
               <div class="ip-address" *ngFor="let ip of res.addresses">
-                <ion-icon [name]="getIpTypeIcon(ip)" [class.ipv4-icon]="isIPv4(ip)"
-                  [class.ipv6-icon]="isIPv6(ip)">
-                </ion-icon>
+                <ion-icon name="globe-outline"></ion-icon>
                 <span class="ip-text">{{ ip }}</span>
-                <ion-chip class="ip-type-chip" [color]="getIpTypeColor(ip)">
-                  {{ getIpType(ip) }}
-                </ion-chip>
               </div>
 
               <div class="ip-error" *ngIf="res.error">

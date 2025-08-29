@@ -6,6 +6,12 @@ import { environment } from "src/environments/environment";
 import { LoggerService } from "../logger/logger.service";
 import { Address, Zone as DnsZone, Record, Resolution } from "./model/object";
 
+export interface Stream<TOut, TIn> {
+    messages$: Observable<TOut>;
+    send: (msg: TIn) => void;
+    close: () => void;
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -148,11 +154,7 @@ export class ApiService {
             backoffMs?: number;       // default 1000
             maxBackoffMs?: number;    // default 10000
         } = {}
-    ): {
-        messages$: Observable<TOut>;
-        send: (msg: TIn) => void;
-        close: () => void;
-    } {
+    ): Stream<TOut, TIn> {
         const {
             reconnect = true,
             maxRetries = Number.POSITIVE_INFINITY,

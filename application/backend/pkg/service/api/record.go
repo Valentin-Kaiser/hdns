@@ -127,10 +127,10 @@ func CreateRecord(c *Context) (interface{}, error) {
 
 	var existingRecord model.Record
 	err = database.Execute(func(db *gorm.DB) error {
-		return db.Where("name = ? AND zone_id = ? AND type = ?", record.Name, record.ZoneID, record.Type).First(&existingRecord).Error
+		return db.Where("name = ? AND zone_id = ?", record.Name, record.ZoneID).First(&existingRecord).Error
 	})
 	if err == nil {
-		return nil, apperror.NewError("a record with the same name, zone ID, and type already exists")
+		return nil, apperror.NewError("a record with the same name and zone ID already exists")
 	}
 
 	err = database.Execute(func(db *gorm.DB) error {
@@ -164,10 +164,10 @@ func UpdateRecord(c *Context) (interface{}, error) {
 
 	var existingRecord model.Record
 	err = database.Execute(func(db *gorm.DB) error {
-		return db.Where("name = ? AND zone_id = ? AND type = ? AND id != ?", record.Name, record.ZoneID, record.Type, record.ID).First(&existingRecord).Error
+		return db.Where("name = ? AND zone_id = ? AND id != ?", record.Name, record.ZoneID, record.ID).First(&existingRecord).Error
 	})
 	if err == nil {
-		return nil, apperror.NewError("a record with the same name, zone ID, and type already exists")
+		return nil, apperror.NewError("a record with the same name and zone ID already exists")
 	}
 
 	err = database.Execute(func(db *gorm.DB) error {
