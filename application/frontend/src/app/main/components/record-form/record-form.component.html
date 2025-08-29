@@ -45,9 +45,11 @@
           <ion-item>
             <ion-select type="text" placeholder="Enter DNS zone ID" [(ngModel)]="record.zone_id"
               (ionChange)="setZone($event.detail.value); onFormFieldChange()" fill="outline" interface="popover">
-              <ion-select-option *ngFor="let zone of zones" [value]="zone.id">
-                {{ zone.name }}
-              </ion-select-option>
+              @for (zone of zones; track zone.id) {
+                <ion-select-option [value]="zone.id">
+                  {{ zone.name }}
+                </ion-select-option>
+              }
             </ion-select>
           </ion-item>
         </div>

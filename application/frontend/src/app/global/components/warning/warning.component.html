@@ -8,10 +8,12 @@
 
   <ion-footer class="warning-footer">
     <ion-toolbar>
-      <ion-item *ngIf="showCheckbox" class="warning-checkbox-row" lines="none">
+      @if (showCheckbox) {
+      <ion-item class="warning-checkbox-row" lines="none">
         <ion-checkbox [(ngModel)]="checkboxChecked" labelPlacement="start"
           justify="start">{{ checkboxLabel }}</ion-checkbox>
       </ion-item>
+      }
       <ion-buttons slot="end">
         @if (leftButtonLabel) {
         <ion-button (click)="doOnLeft()" [color]="leftButtonColor" expand="block">
