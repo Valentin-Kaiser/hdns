@@ -18,7 +18,7 @@ type Resolution struct {
 	Server       string   `json:"server"`
 	Addresses    []string `json:"addresses"`
 	ResponseTime int64    `json:"response_time"`
-	Error        error    `json:"error"`
+	Error        string   `json:"error"`
 }
 
 // Resolver handles DNS resolution against multiple servers
@@ -66,14 +66,29 @@ func (r *Resolver) Resolve(domain string) ([]Resolution, error) {
 			ips, err := resolver.LookupHost(ctx, domain)
 			responseTime := time.Since(start)
 
+			addresses := make([]string, 0, len(ips))
+			for _, ip := range ips {
+				if !ValidateAddress(ip) {
+					log.Warn().
+						Str("server", dnsServer).
+						Str("domain", domain).
+						Str("ip", ip).
+						Dur("response_time", responseTime).
+						Msg("Invalid IP address")
+					continue
+				}
+				addresses = append(addresses, ip)
+			}
+
 			results[index] = Resolution{
 				Server:       dnsServer,
-				Addresses:    ips,
+				Addresses:    addresses,
 				ResponseTime: responseTime.Milliseconds(),
-				Error:        err,
 			}
 
 			if err != nil {
+				results[index].Error = err.Error()
+
 				log.Warn().
 					Str("server", dnsServer).
 					Str("domain", domain).

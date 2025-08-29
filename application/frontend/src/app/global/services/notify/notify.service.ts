@@ -247,7 +247,10 @@ export class NotifyService {
 		rightButtonLabel?: string,
 		leftButtonColor?: string,
 		rightButtonColor?: string,
-		hint?: string,
+		showCheckbox?: boolean,
+		checkboxLabel?: string,
+		checkboxValue?: boolean,
+		checkboxChange?: (checked: boolean) => void,
 		param?: any
 	) {
 		const modal = await this.modalController.create({
@@ -264,7 +267,10 @@ export class NotifyService {
 				rightButtonLabel,
 				leftButtonColor,
 				rightButtonColor,
-				hint,
+				showCheckbox,
+				checkboxLabel,
+				checkboxValue,
+				checkboxChange,
 				param,
 			},
 		});

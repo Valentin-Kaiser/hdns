@@ -11,7 +11,6 @@ export interface Address extends BaseModel {
 export interface Record extends BaseModel {
     token: string;
     zone_id: string;
-    type: RecordType;
     domain: string;
     name: string;
     ttl: number;
@@ -33,16 +32,6 @@ export interface Zone {
     id: string;
     name: string;
     records_count: number;
-}
-
-export enum RecordType {
-    Unknown = "",
-    A = "A",
-    AAAA = "AAAA",
-    CNAME = "CNAME",
-    MX = "MX",
-    TXT = "TXT",
-    NS = "NS"
 }
 
 export interface Config {

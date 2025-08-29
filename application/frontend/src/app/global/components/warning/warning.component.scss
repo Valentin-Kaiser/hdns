@@ -1,3 +1,19 @@
+ion-item, ion-item:hover {
+  --background: var(--ion-background-color);
+  --border-radius: 16px;
+}
+
+.warning-checkbox-row {
+  display: flex;
+  align-items: center;
+  padding: 0px 12px;
+  gap: 8px;
+}
+
+.warning-checkbox-label {
+  font-size: 15px;
+  color: var(--ion-color-step-700);
+}
 .warning-modal-content {
   .warning-header {
     ion-toolbar {
@@ -111,7 +127,7 @@
 
   .warning-footer {
     ion-toolbar {
-      --background: var(--ion-color-step-100);
+      --background: var(--ion-background-color);
       --border-color: var(--ion-color-step-200);
       border-top: 1px solid var(--border-color);
       

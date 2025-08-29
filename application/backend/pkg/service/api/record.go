@@ -127,10 +127,10 @@ func CreateRecord(c *Context) (interface{}, error) {
 
 	var existingRecord model.Record
 	err = database.Execute(func(db *gorm.DB) error {
-		return db.Where("name = ? AND zone_id = ? AND type = ?", record.Name, record.ZoneID, record.Type).First(&existingRecord).Error
+		return db.Where("name = ? AND zone_id = ?", record.Name, record.ZoneID).First(&existingRecord).Error
 	})
 	if err == nil {
-		return nil, apperror.NewError("a record with the same name, zone ID, and type already exists")
+		return nil, apperror.NewError("a record with the same name and zone ID already exists")
 	}
 
 	err = database.Execute(func(db *gorm.DB) error {
@@ -138,6 +138,11 @@ func CreateRecord(c *Context) (interface{}, error) {
 	})
 	if err != nil {
 		return nil, apperror.NewError("failed to create record").AddError(err)
+	}
+
+	err = dns.RefreshRecord(&record)
+	if err != nil {
+		return nil, apperror.Wrap(err)
 	}
 
 	return record, nil
@@ -159,10 +164,10 @@ func UpdateRecord(c *Context) (interface{}, error) {
 
 	var existingRecord model.Record
 	err = database.Execute(func(db *gorm.DB) error {
-		return db.Where("name = ? AND zone_id = ? AND type = ? AND id != ?", record.Name, record.ZoneID, record.Type, record.ID).First(&existingRecord).Error
+		return db.Where("name = ? AND zone_id = ? AND id != ?", record.Name, record.ZoneID, record.ID).First(&existingRecord).Error
 	})
 	if err == nil {
-		return nil, apperror.NewError("a record with the same name, zone ID, and type already exists")
+		return nil, apperror.NewError("a record with the same name and zone ID already exists")
 	}
 
 	err = database.Execute(func(db *gorm.DB) error {
@@ -181,7 +186,24 @@ func DeleteRecord(c *Context) (interface{}, error) {
 		return nil, apperror.NewError("record ID is required")
 	}
 
+	var record model.Record
 	err := database.Execute(func(db *gorm.DB) error {
+		return db.First(&record, id).Error
+	})
+	if err != nil {
+		return nil, apperror.NewError("failed to find record").AddError(err)
+	}
+
+	// Get the query parameter if the record should be deleted from Hetzner
+	deleteFromHetzner := c.req.URL.Query().Get("delete_from_hetzner")
+	if deleteFromHetzner == "true" {
+		err := dns.DeleteRecord(&record)
+		if err != nil {
+			return nil, apperror.Wrap(err)
+		}
+	}
+
+	err = database.Execute(func(db *gorm.DB) error {
 		return db.Delete(&model.Record{}, id).Error
 	})
 	if err != nil {

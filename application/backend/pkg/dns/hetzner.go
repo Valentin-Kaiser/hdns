@@ -59,16 +59,13 @@ func UpdateRecord(r *model.Record, addr *model.Address) error {
 	return nil
 }
 
-func FetchRecord(r *model.Record) (*Record, error) {
+func FetchRecord(r *model.Record) (*Record, bool, error) {
 	c := &client{APIToken: r.Token.String()}
 	rec, found, err := c.findRecord(r)
 	if err != nil {
-		return nil, apperror.Wrap(err)
+		return nil, false, apperror.Wrap(err)
 	}
-	if !found {
-		return nil, apperror.NewError("record not found")
-	}
-	return rec, nil
+	return rec, found, nil
 }
 
 func FetchZones(token string) ([]Zone, error) {
@@ -91,6 +88,18 @@ func FetchZones(token string) ([]Zone, error) {
 	return res.Zones, nil
 }
 
+func DeleteRecord(r *model.Record) error {
+	c := &client{APIToken: r.Token.String()}
+	rec, found, err := c.findRecord(r)
+	if err != nil {
+		return apperror.Wrap(err)
+	}
+	if !found {
+		return apperror.NewError("record not found")
+	}
+	return c.deleteRecord(rec.ID)
+}
+
 func updateHetzner(r *model.Record, ip string) error {
 	c := &client{APIToken: r.Token.String()}
 	rec, found, err := c.findRecord(r)
@@ -100,7 +109,7 @@ func updateHetzner(r *model.Record, ip string) error {
 	if !found {
 		newRecord := &Record{
 			ZoneID: r.ZoneID,
-			Type:   string(r.Type),
+			Type:   "A",
 			Name:   r.Name,
 			TTL:    r.TTL,
 			Value:  ip,
@@ -152,8 +161,17 @@ func (c *client) createRecord(record *Record) error {
 	return c.handleAPIResponse(body, "create")
 }
 
+func (c *client) deleteRecord(recordID string) error {
+	url := hetznerBaseURL + "/records/" + recordID
+	body, err := c.fetch(http.MethodDelete, url, nil)
+	if err != nil {
+		return apperror.NewError("deleting the record failed").AddError(err)
+	}
+	return c.handleAPIResponse(body, "delete")
+}
+
 func (c *client) findRecord(r *model.Record) (*Record, bool, error) {
-	url := fmt.Sprintf("%s?zone_id=%s&name=%s&type=%s", hetznerBaseURL+"/records", r.ZoneID, r.Name, r.Type)
+	url := fmt.Sprintf("%s?zone_id=%s&name=%s&type=A", hetznerBaseURL+"/records", r.ZoneID, r.Name)
 	body, err := c.fetch(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, false, err
@@ -210,18 +228,22 @@ func (c *client) validateRecord(r *Record) error {
 		return apperror.NewError("record name is required")
 	case r.Value == "":
 		return apperror.NewError("record value is required")
+	case !ValidateAddress(r.Value):
+		return apperror.NewError("record value is invalid")
 	}
 	return nil
 }
 
 func (c *client) handleAPIResponse(body []byte, action string) error {
-	var r Record
+	var r struct {
+		Error map[string]interface{} `json:"error"`
+	}
 	err := json.Unmarshal(body, &r)
 	if err != nil {
 		return apperror.NewErrorf("unmarshal response for %s action failed", action).AddError(err)
 	}
-	if r.Error != "" {
-		return apperror.NewError("API error occured").AddError(apperror.NewError(r.Error))
+	if len(r.Error) > 0 {
+		return apperror.NewError("API error occured").AddError(apperror.NewErrorf("%v", r.Error))
 	}
 	return nil
 }

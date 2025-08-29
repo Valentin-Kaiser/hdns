@@ -84,13 +84,13 @@ func resolveIPAddress(url string) (string, error) {
 		return "", apperror.NewErrorf("failed to read response from %s", url).AddError(err)
 	}
 	addr := strings.TrimSpace(string(bytes))
-	if !isValidIPAddress(addr) {
+	if !ValidateAddress(addr) {
 		return "", apperror.NewErrorf("invalid IP address %s from %s", addr, url)
 	}
 	return addr, nil
 }
 
-func isValidIPAddress(ip string) bool {
+func ValidateAddress(ip string) bool {
 	addr := net.ParseIP(ip)
 	if addr == nil {
 		return false
@@ -105,6 +105,9 @@ func isValidIPAddress(ip string) bool {
 		return false
 	}
 	if addr.IsMulticast() {
+		return false
+	}
+	if addr.To4() == nil {
 		return false
 	}
 	return true
